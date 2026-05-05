@@ -1,0 +1,82 @@
+<div class="login-container">
+
+  <!-- LADO IZQUIERDO -->
+  <div class="left-panel">
+    <div class="overlay-shape"></div>
+    <div class="left-content">
+      <img src="assets/images/LogoComercialFin.png" alt="Logo" class="logo" />
+      <h1>¡Bienvenido!</h1>
+      <h3>CHEM-MODINV</h3>
+      <p>Plataforma inteligente para la gestión de inventarios,
+         predicción de demanda y control de productos químicos.</p>
+    </div>
+    <div class="circle circle-1"></div>
+    <div class="circle circle-2"></div>
+  </div>
+
+  <!-- LADO DERECHO -->
+  <div class="right-panel">
+    <div class="form-box">
+
+      <h2>Iniciar sesión</h2>
+      <p class="subtitle">Ingresa tus credenciales</p>
+
+      <div class="error-box" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="submit()">
+
+        <!-- CORREO -->
+        <div class="input-group">
+          <label>Correo electrónico</label>
+          <div class="input-wrapper">
+            <span class="icon">📧</span>
+            <input type="email" formControlName="correo" placeholder="usuario@empresa.com" />
+          </div>
+          <div class="error" *ngIf="emailControl.touched && emailControl.invalid">
+            <span *ngIf="emailControl.errors?.['required']">El correo es obligatorio</span>
+            <span *ngIf="emailControl.errors?.['email']">Correo inválido</span>
+          </div>
+        </div>
+
+        <!-- CONTRASEÑA -->
+        <div class="input-group">
+          <label>Contraseña</label>
+          <div class="input-wrapper">
+            <span class="icon">🔒</span>
+            <input [type]="hidePassword ? 'password' : 'text'"
+                   formControlName="contrasena" placeholder="••••••••" />
+            <span class="toggle" (click)="hidePassword = !hidePassword">
+              <mat-icon>{{ hidePassword ? 'visibility' : 'visibility_off' }}</mat-icon>
+            </span>
+          </div>
+          <div class="error" *ngIf="passwordControl.touched && passwordControl.invalid">
+            <span *ngIf="passwordControl.errors?.['required']">La contraseña es obligatoria</span>
+            <span *ngIf="passwordControl.errors?.['minlength']">Mínimo 6 caracteres</span>
+          </div>
+        </div>
+
+        <!-- OPCIONES -->
+        <div class="options">
+          <label><input type="checkbox" formControlName="remember" /> Recordarme</label>
+          <a>¿Olvidaste tu contraseña?</a>
+        </div>
+
+        <!-- BOTÓN -->
+        <button type="submit" [disabled]="loginForm.invalid || isLoading">
+          {{ isLoading ? 'Ingresando...' : 'Ingresar' }}
+        </button>
+
+      </form>
+
+      <!-- LOADER OVERLAY -->
+      <div class="loading-overlay" *ngIf="isLoading">
+        <div class="loader-box">
+          <div class="spinner"></div>
+          <p>Ingresando...</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,62 @@
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" [class.closed]="!isSidebarOpen">
+
+    <div class="logo-box">
+      <img src="assets/images/LogoComercialFin.png" alt="logo" />
+      <h2 *ngIf="isSidebarOpen">CHEM-MODINV</h2>
+      <small *ngIf="isSidebarOpen">v2.0.0</small>
+    </div>
+
+    <nav class="menu">
+      <a *ngFor="let item of visibleMenu"
+         [routerLink]="item.route"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }"
+         class="menu-item">
+        <span class="icon">{{ item.icon }}</span>
+        <span class="text" *ngIf="isSidebarOpen">{{ item.label }}</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a class="menu-item" (click)="logout()">
+        <span class="icon">🚪</span>
+        <span class="text" *ngIf="isSidebarOpen">Cerrar sesión</span>
+      </a>
+    </div>
+
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="left">
+        <button class="menu-btn" (click)="toggleSidebar()">☰</button>
+      </div>
+      <div class="center"><h3>CHEM-MODINV</h3></div>
+      <div class="right">
+        <div class="user" (click)="toggleUserMenu(); $event.stopPropagation()">
+          <span class="avatar">{{ userName?.charAt(0) || 'U' }}</span>
+          <div class="user-info">
+            <span class="name">{{ userName }}</span>
+            <small class="role">{{ userRole }}</small>
+          </div>
+          <div class="dropdown" *ngIf="showUserMenu" (click)="$event.stopPropagation()">
+            <button (click)="logout()">Cerrar sesión</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENIDO -->
+    <main class="content">
+      <router-outlet />
+    </main>
+
+  </div>
+
+</div>

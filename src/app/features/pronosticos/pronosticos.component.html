@@ -1,0 +1,173 @@
+<div class="page-container">
+  <div class="page-header">
+    <h1 class="page-title">
+      <mat-icon>trending_up</mat-icon>
+      Pronósticos de Demanda
+    </h1>
+  </div>
+
+  <mat-tab-group>
+    <!-- Tab Calcular -->
+    <mat-tab label="Calcular Pronóstico">
+      <div class="tab-content">
+        <mat-card class="calc-card">
+          <mat-card-header>
+            <mat-card-title>Parámetros del Modelo</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <form [formGroup]="calcForm" class="calc-form">
+              <mat-form-field appearance="outline" class="full">
+                <mat-label>Artículo</mat-label>
+                <input matInput [value]="articuloSearch" (input)="onArticuloSearch($event)"
+                       [matAutocomplete]="autoArt" placeholder="Buscar artículo...">
+                <mat-autocomplete #autoArt="matAutocomplete">
+                  @for (art of articulosFiltrados; track art.id) {
+                    <mat-option [value]="art.codigo + ' - ' + art.descripcion" (click)="seleccionarArticulo(art)">
+                      <strong>{{ art.codigo }}</strong> — {{ art.descripcion }}
+                    </mat-option>
+                  }
+                </mat-autocomplete>
+              </mat-form-field>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="flex2">
+                  <mat-label>Modelo de Pronóstico</mat-label>
+                  <mat-select formControlName="modelo">
+                    <mat-option value="suavizacion_exponencial">Suavización Exponencial</mat-option>
+                    <mat-option value="arima">ARIMA</mat-option>
+                    <mat-option value="regresion_minimos_cuadrados">Regresión Mínimos Cuadrados</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="flex1">
+                  <mat-label>Períodos (1-12)</mat-label>
+                  <input matInput type="number" formControlName="periodos" min="1" max="12">
+                </mat-form-field>
+              </div>
+
+              <div class="form-actions">
+                <button mat-raised-button color="primary" (click)="calcular()" [disabled]="calculando">
+                  @if (calculando) {
+                    <mat-spinner diameter="18" style="display:inline-block;margin-right:6px;"></mat-spinner>
+                  }
+                  <mat-icon>calculate</mat-icon>
+                  Calcular Pronóstico
+                </button>
+              </div>
+            </form>
+          </mat-card-content>
+        </mat-card>
+
+        @if (resultados.length > 0) {
+          <mat-card class="results-card">
+            <mat-card-header>
+              <mat-card-title>Resultados del Pronóstico</mat-card-title>
+              <mat-card-subtitle>
+                Artículo: {{ articuloSeleccionado?.codigo }} — {{ articuloSeleccionado?.descripcion }}
+              </mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <table mat-table [dataSource]="resultados" class="full-width">
+                <ng-container matColumnDef="periodo">
+                  <th mat-header-cell *matHeaderCellDef>Período</th>
+                  <td mat-cell *matCellDef="let row">{{ row.periodo ?? row.mes ?? row.fecha }}</td>
+                </ng-container>
+                <ng-container matColumnDef="prediccion">
+                  <th mat-header-cell *matHeaderCellDef>Predicción</th>
+                  <td mat-cell *matCellDef="let row">
+                    <strong>{{ row.prediccion ?? row.valor ?? row.demanda_predicha | number:'1.2-2' }}</strong>
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="limite_inferior">
+                  <th mat-header-cell *matHeaderCellDef>Límite Inferior</th>
+                  <td mat-cell *matCellDef="let row">{{ row.limite_inferior ?? '—' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="limite_superior">
+                  <th mat-header-cell *matHeaderCellDef>Límite Superior</th>
+                  <td mat-cell *matCellDef="let row">{{ row.limite_superior ?? '—' }}</td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="displayedColumnsResultados"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumnsResultados;"></tr>
+              </table>
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+    </mat-tab>
+
+    <!-- Tab Más Vendidos -->
+    <mat-tab label="Más Vendidos">
+      <div class="tab-content">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Artículos Más Vendidos</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            @if (loadingMasVendidos) {
+              <div class="loading-center"><mat-spinner diameter="40"></mat-spinner></div>
+            } @else {
+              <table mat-table [dataSource]="masVendidos" class="full-width">
+                <ng-container matColumnDef="codigo">
+                  <th mat-header-cell *matHeaderCellDef>Código</th>
+                  <td mat-cell *matCellDef="let row"><strong>{{ row.codigo ?? row.articulo_codigo }}</strong></td>
+                </ng-container>
+                <ng-container matColumnDef="descripcion">
+                  <th mat-header-cell *matHeaderCellDef>Descripción</th>
+                  <td mat-cell *matCellDef="let row">{{ row.descripcion ?? row.articulo_descripcion }}</td>
+                </ng-container>
+                <ng-container matColumnDef="total_vendido">
+                  <th mat-header-cell *matHeaderCellDef>Total Vendido</th>
+                  <td mat-cell *matCellDef="let row">{{ row.total_vendido ?? row.cantidad_total }}</td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="displayedColumnsMasVendidos"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumnsMasVendidos;"></tr>
+                <tr class="mat-row" *matNoDataRow>
+                  <td class="mat-cell no-data" colspan="3">No hay datos disponibles</td>
+                </tr>
+              </table>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <!-- Tab Recomendaciones -->
+    <mat-tab label="Recomendaciones">
+      <div class="tab-content">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Recomendaciones de Compra</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            @if (loadingRecomendaciones) {
+              <div class="loading-center"><mat-spinner diameter="40"></mat-spinner></div>
+            } @else {
+              <table mat-table [dataSource]="recomendaciones" class="full-width">
+                <ng-container matColumnDef="articulo">
+                  <th mat-header-cell *matHeaderCellDef>Artículo</th>
+                  <td mat-cell *matCellDef="let row">
+                    <strong>{{ row.articulo_codigo ?? row.codigo }}</strong>
+                    <br><small>{{ row.articulo_descripcion ?? row.descripcion }}</small>
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="cantidad_recomendada">
+                  <th mat-header-cell *matHeaderCellDef>Cantidad Recomendada</th>
+                  <td mat-cell *matCellDef="let row">{{ row.cantidad_recomendada ?? row.cantidad }}</td>
+                </ng-container>
+                <ng-container matColumnDef="motivo">
+                  <th mat-header-cell *matHeaderCellDef>Motivo</th>
+                  <td mat-cell *matCellDef="let row">{{ row.motivo ?? row.razon ?? '—' }}</td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="displayedColumnsRecomendaciones"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumnsRecomendaciones;"></tr>
+                <tr class="mat-row" *matNoDataRow>
+                  <td class="mat-cell no-data" colspan="3">No hay recomendaciones disponibles</td>
+                </tr>
+              </table>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

@@ -1,0 +1,96 @@
+:host {
+  display: flex;
+  flex: 1;
+  height: 100%;
+}
+
+.home {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(circle at top, #eef3f9, #dfe6ef);
+  position: relative;
+  overflow: hidden;
+  min-height: 500px;
+}
+
+/* TARJETA CENTRAL */
+.welcome-box {
+  text-align: center;
+  padding: 50px 60px;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+  animation: fadeIn 0.8s ease;
+  z-index: 1;
+}
+
+/* CÍRCULO */
+.circle {
+  width: 130px;
+  height: 130px;
+  margin: 0 auto 25px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1e88e5, #1565c0);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 50px;
+  color: white;
+  position: relative;
+  animation: pulse 2s infinite;
+}
+
+/* EFECTO GLOW */
+.circle::after {
+  content: "";
+  position: absolute;
+  width: 150%;
+  height: 150%;
+  border-radius: 50%;
+  background: rgba(30,136,229,0.2);
+  animation: ripple 2s infinite;
+}
+
+/* TEXTO */
+h1 {
+  font-size: 36px;
+  margin-bottom: 10px;
+  font-weight: 700;
+  color: #1a237e;
+}
+
+p {
+  color: #555;
+  font-size: 15px;
+}
+
+/* FOOTER */
+.footer {
+  position: absolute;
+  bottom: 16px;
+  width: 100%;
+  text-align: center;
+  font-size: 12px;
+  color: #777;
+}
+
+/* ANIMACIONES */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(25px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+@keyframes ripple {
+  0%   { transform: scale(0.8); opacity: 0.6; }
+  100% { transform: scale(1.5); opacity: 0; }
+}

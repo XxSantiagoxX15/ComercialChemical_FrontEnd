@@ -1,0 +1,80 @@
+<h2 mat-dialog-title>
+  <mat-icon>{{ isEdit ? 'edit' : 'add_circle' }}</mat-icon>
+  {{ isEdit ? 'Editar Artículo' : 'Nuevo Artículo' }}
+</h2>
+
+<mat-dialog-content>
+  @if (error) {
+    <div class="form-error">
+      <mat-icon>error</mat-icon>
+      {{ error }}
+    </div>
+  }
+
+  <form [formGroup]="form" class="articulo-form">
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="half">
+        <mat-label>Código *</mat-label>
+        <input matInput formControlName="codigo" placeholder="Ej: ART-001">
+        @if (form.get('codigo')?.hasError('required') && form.get('codigo')?.touched) {
+          <mat-error>El código es requerido</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="half">
+        <mat-label>Unidad de Medida *</mat-label>
+        <mat-select formControlName="unidad_medida">
+          <mat-option value="unidad">Unidad</mat-option>
+          <mat-option value="kg">Kilogramo</mat-option>
+          <mat-option value="litro">Litro</mat-option>
+          <mat-option value="caja">Caja</mat-option>
+          <mat-option value="paquete">Paquete</mat-option>
+          <mat-option value="metro">Metro</mat-option>
+        </mat-select>
+        @if (form.get('unidad_medida')?.hasError('required') && form.get('unidad_medida')?.touched) {
+          <mat-error>La unidad es requerida</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Descripción *</mat-label>
+      <input matInput formControlName="descripcion" placeholder="Descripción del artículo">
+      @if (form.get('descripcion')?.hasError('required') && form.get('descripcion')?.touched) {
+        <mat-error>La descripción es requerida</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Categoría</mat-label>
+      <input matInput formControlName="categoria" placeholder="Ej: Químicos, Reactivos...">
+    </mat-form-field>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="third">
+        <mat-label>Stock Mínimo</mat-label>
+        <input matInput type="number" formControlName="stock_minimo" min="0">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="third">
+        <mat-label>Stock Máximo</mat-label>
+        <input matInput type="number" formControlName="stock_maximo" min="0">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="third">
+        <mat-label>Tiempo Reposición (días)</mat-label>
+        <input matInput type="number" formControlName="tiempo_reposicion_dias" min="0">
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancelar</button>
+  <button mat-raised-button color="primary" (click)="guardar()" [disabled]="saving">
+    @if (saving) {
+      <mat-spinner diameter="20" style="display:inline-block;margin-right:8px;"></mat-spinner>
+    }
+    {{ isEdit ? 'Actualizar' : 'Crear' }}
+  </button>
+</mat-dialog-actions>

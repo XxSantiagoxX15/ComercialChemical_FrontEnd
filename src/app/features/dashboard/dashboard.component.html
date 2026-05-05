@@ -1,0 +1,130 @@
+<div class="dashboard-container">
+  <div class="page-header">
+    <h1 class="page-title">
+      <mat-icon>dashboard</mat-icon>
+      Dashboard
+    </h1>
+    <button mat-stroked-button (click)="cargarDatos()" [disabled]="loading">
+      <mat-icon>refresh</mat-icon>
+      Actualizar
+    </button>
+  </div>
+
+  @if (loading) {
+    <div class="loading-center">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Cargando datos...</p>
+    </div>
+  } @else if (error) {
+    <mat-card class="error-card">
+      <mat-card-content>
+        <mat-icon color="warn">error</mat-icon>
+        <span>{{ error }}</span>
+        <button mat-button color="primary" (click)="cargarDatos()">Reintentar</button>
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <!-- KPI Cards -->
+    <div class="kpi-grid">
+      <mat-card class="kpi-card kpi-blue">
+        <mat-card-content>
+          <div class="kpi-icon-wrap">
+            <mat-icon>inventory_2</mat-icon>
+          </div>
+          <div class="kpi-info">
+            <div class="kpi-value">{{ totalArticulos }}</div>
+            <div class="kpi-label">Total Artículos</div>
+          </div>
+        </mat-card-content>
+        <mat-card-actions>
+          <a mat-button routerLink="/inventario/articulos">Ver todos →</a>
+        </mat-card-actions>
+      </mat-card>
+
+      <mat-card class="kpi-card kpi-red">
+        <mat-card-content>
+          <div class="kpi-icon-wrap">
+            <mat-icon>warning</mat-icon>
+          </div>
+          <div class="kpi-info">
+            <div class="kpi-value">{{ stockCritico.length }}</div>
+            <div class="kpi-label">Stock Crítico</div>
+          </div>
+        </mat-card-content>
+        <mat-card-actions>
+          <a mat-button routerLink="/inventario/alertas">Ver alertas →</a>
+        </mat-card-actions>
+      </mat-card>
+
+      <mat-card class="kpi-card kpi-orange">
+        <mat-card-content>
+          <div class="kpi-icon-wrap">
+            <mat-icon>shopping_cart</mat-icon>
+          </div>
+          <div class="kpi-info">
+            <div class="kpi-value">{{ ordenesPendientes }}</div>
+            <div class="kpi-label">Órdenes Pendientes</div>
+          </div>
+        </mat-card-content>
+        <mat-card-actions>
+          <a mat-button routerLink="/compras/ordenes">Ver órdenes →</a>
+        </mat-card-actions>
+      </mat-card>
+
+      <mat-card class="kpi-card kpi-green">
+        <mat-card-content>
+          <div class="kpi-icon-wrap">
+            <mat-icon>trending_up</mat-icon>
+          </div>
+          <div class="kpi-info">
+            <div class="kpi-value">—</div>
+            <div class="kpi-label">Pronósticos</div>
+          </div>
+        </mat-card-content>
+        <mat-card-actions>
+          <a mat-button routerLink="/pronosticos">Ver pronósticos →</a>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+
+    <!-- Alertas recientes -->
+    <mat-card class="alerts-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar color="warn">warning</mat-icon>
+        <mat-card-title>Alertas de Stock Crítico</mat-card-title>
+        <mat-card-subtitle>Artículos que requieren atención inmediata</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        @if (ultimasAlertas.length === 0) {
+          <div class="empty-state">
+            <mat-icon>check_circle</mat-icon>
+            <p>No hay alertas de stock crítico</p>
+          </div>
+        } @else {
+          <div class="alerts-list">
+            @for (alerta of ultimasAlertas; track alerta.id) {
+              <div class="alert-item">
+                <div class="alert-info">
+                  <span class="alert-code">{{ alerta.codigo }}</span>
+                  <span class="alert-desc">{{ alerta.descripcion }}</span>
+                </div>
+                <div class="alert-stock">
+                  <span class="stock-value">{{ alerta.stock_actual }} / {{ alerta.stock_minimo }}</span>
+                  <mat-chip [class]="'chip-' + getNivelUrgencia(alerta)">
+                    {{ getPctStock(alerta) }}%
+                  </mat-chip>
+                </div>
+              </div>
+            }
+          </div>
+          <mat-divider></mat-divider>
+          <div class="card-footer">
+            <a mat-button color="warn" routerLink="/inventario/alertas">
+              Ver todas las alertas ({{ stockCritico.length }})
+            </a>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

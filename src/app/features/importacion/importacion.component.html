@@ -1,0 +1,135 @@
+<div class="page-container">
+  <div class="page-header">
+    <h1 class="page-title">
+      <mat-icon>upload_file</mat-icon>
+      Importación de Datos
+    </h1>
+  </div>
+
+  <!-- Selector de tipo -->
+  <mat-card class="tipo-card">
+    <mat-card-content>
+      <div class="tipo-buttons">
+        <button mat-raised-button
+                [color]="tipoActivo === 'toma_inventario' ? 'primary' : ''"
+                (click)="tipoActivo = 'toma_inventario'; archivoSeleccionado = null; uploadResult = null">
+          <mat-icon>inventory</mat-icon>
+          Toma de Inventario
+        </button>
+        <button mat-raised-button
+                [color]="tipoActivo === 'ventas_cliente' ? 'primary' : ''"
+                (click)="tipoActivo = 'ventas_cliente'; archivoSeleccionado = null; uploadResult = null">
+          <mat-icon>receipt_long</mat-icon>
+          Ventas por Cliente
+        </button>
+      </div>
+      <p class="tipo-desc">
+        @if (tipoActivo === 'toma_inventario') {
+          Sube un archivo Excel o CSV con el conteo físico del inventario.
+        } @else {
+          Sube un archivo Excel o CSV con el historial de ventas por cliente.
+        }
+      </p>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Área de carga -->
+  <mat-card class="upload-card">
+    <mat-card-content>
+      <div class="drop-zone"
+           (dragover)="onDragOver($event)"
+           (drop)="onDrop($event)"
+           [class.has-file]="archivoSeleccionado">
+        @if (!archivoSeleccionado) {
+          <mat-icon class="drop-icon">cloud_upload</mat-icon>
+          <p class="drop-text">Arrastra tu archivo aquí o</p>
+          <label class="file-label">
+            <input type="file" accept=".xlsx,.xls,.csv" (change)="onFileSelected($event)" hidden>
+            <span mat-raised-button class="select-btn">Seleccionar archivo</span>
+          </label>
+          <p class="drop-hint">Formatos aceptados: .xlsx, .xls, .csv</p>
+        } @else {
+          <mat-icon class="file-icon">description</mat-icon>
+          <p class="file-name">{{ archivoSeleccionado.name }}</p>
+          <p class="file-size">{{ (archivoSeleccionado.size / 1024).toFixed(1) }} KB</p>
+          <div class="file-actions">
+            <button mat-raised-button color="primary" (click)="subir()" [disabled]="uploading">
+              @if (uploading) {
+                <mat-spinner diameter="18" style="display:inline-block;margin-right:6px;"></mat-spinner>
+              }
+              <mat-icon>upload</mat-icon>
+              Subir Archivo
+            </button>
+            <button mat-stroked-button (click)="archivoSeleccionado = null; uploadResult = null">
+              <mat-icon>close</mat-icon>
+              Cancelar
+            </button>
+          </div>
+        }
+      </div>
+
+      @if (uploading) {
+        <mat-progress-bar mode="indeterminate" style="margin-top: 1rem;"></mat-progress-bar>
+      }
+
+      @if (uploadResult) {
+        <div class="upload-result" [class.result-ok]="uploadResult.tipo === 'exito'" [class.result-error]="uploadResult.tipo === 'error'">
+          <mat-icon>{{ uploadResult.tipo === 'exito' ? 'check_circle' : 'error' }}</mat-icon>
+          <div>
+            <strong>{{ uploadResult.tipo === 'exito' ? 'Importación exitosa' : 'Error en la importación' }}</strong>
+            <p>{{ uploadResult.mensaje }}</p>
+            @if (uploadResult.detalle?.registros_procesados) {
+              <small>Registros procesados: {{ uploadResult.detalle.registros_procesados }}</small>
+            }
+          </div>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Historial -->
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Historial de Importaciones</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      @if (loadingHistorial) {
+        <div class="loading-center"><mat-spinner diameter="40"></mat-spinner></div>
+      } @else {
+        <div class="table-wrapper">
+          <table mat-table [dataSource]="historial" class="full-width">
+            <ng-container matColumnDef="fecha">
+              <th mat-header-cell *matHeaderCellDef>Fecha</th>
+              <td mat-cell *matCellDef="let row">{{ row.fecha_importacion ?? row.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="tipo">
+              <th mat-header-cell *matHeaderCellDef>Tipo</th>
+              <td mat-cell *matCellDef="let row">{{ getTipoLabel(row.tipo_informe ?? row.tipo) }}</td>
+            </ng-container>
+            <ng-container matColumnDef="archivo">
+              <th mat-header-cell *matHeaderCellDef>Archivo</th>
+              <td mat-cell *matCellDef="let row">{{ row.nombre_archivo ?? row.archivo ?? '—' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="estado">
+              <th mat-header-cell *matHeaderCellDef>Estado</th>
+              <td mat-cell *matCellDef="let row">
+                <span class="estado-badge" [ngClass]="getEstadoChip(row.resultado ?? row.estado)">
+                  {{ getEstadoLabel(row.resultado ?? row.estado) }}
+                </span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="registros">
+              <th mat-header-cell *matHeaderCellDef>Registros</th>
+              <td mat-cell *matCellDef="let row">{{ row.registros_procesados ?? '—' }}</td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="displayedColumnsHistorial"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumnsHistorial;"></tr>
+            <tr class="mat-row" *matNoDataRow>
+              <td class="mat-cell no-data" colspan="5">No hay importaciones registradas</td>
+            </tr>
+          </table>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>
