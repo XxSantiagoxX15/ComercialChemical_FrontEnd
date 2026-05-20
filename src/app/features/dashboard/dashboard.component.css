@@ -1,167 +1,255 @@
+/* ══════════════════════════════════════════════════════════════════
+   DASHBOARD  ·  Comercial Chemical S.A.S.
+══════════════════════════════════════════════════════════════════ */
 .dashboard-container {
-  max-width: 1200px;
+  max-width: 1280px;
 }
 
+/* ── Page header ───────────────────────────────────────────────── */
 .page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.75rem;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .page-title {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   margin: 0;
   font-size: 1.5rem;
-  font-weight: 600;
+  font-weight: 800;
   color: #1a237e;
+  letter-spacing: -0.3px;
+}
+.page-title mat-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  color: #3949ab;
 }
 
-.loading-center {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem;
-  gap: 1rem;
-  color: #666;
-}
-
-.error-card mat-card-content {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 1rem;
-}
-
+/* ── KPI Grid ──────────────────────────────────────────────────── */
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1.1rem;
   margin-bottom: 1.5rem;
 }
 
 .kpi-card {
-  border-radius: 12px !important;
+  border-radius: 16px !important;
   overflow: hidden;
+  border: none !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: default;
 }
+.kpi-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 32px rgba(0,0,0,0.11), 0 2px 8px rgba(0,0,0,0.05) !important;
+}
+
+/* Color themes */
+.kpi-blue  { background: linear-gradient(135deg, #1a237e 0%, #283593 100%) !important; }
+.kpi-red   { background: linear-gradient(135deg, #b71c1c 0%, #c62828 100%) !important; }
+.kpi-orange{ background: linear-gradient(135deg, #bf360c 0%, #e65100 100%) !important; }
+.kpi-green { background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%) !important; }
 
 .kpi-card mat-card-content {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 20px 16px 8px !important;
+  gap: 18px;
+  padding: 22px 20px 10px !important;
 }
 
 .kpi-icon-wrap {
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 58px; height: 58px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
 }
-
 .kpi-icon-wrap mat-icon {
   font-size: 28px;
   width: 28px;
   height: 28px;
-  color: white;
+  color: rgba(255,255,255,0.95);
 }
 
-.kpi-blue .kpi-icon-wrap { background: #1a237e; }
-.kpi-red .kpi-icon-wrap { background: #c62828; }
-.kpi-orange .kpi-icon-wrap { background: #e65100; }
-.kpi-green .kpi-icon-wrap { background: #2e7d32; }
+.kpi-info { flex: 1; }
 
 .kpi-value {
-  font-size: 2rem;
-  font-weight: 700;
+  font-size: 2.2rem;
+  font-weight: 800;
   line-height: 1;
+  color: #ffffff;
+  letter-spacing: -1px;
 }
-
-.kpi-blue .kpi-value { color: #1a237e; }
-.kpi-red .kpi-value { color: #c62828; }
-.kpi-orange .kpi-value { color: #e65100; }
-.kpi-green .kpi-value { color: #2e7d32; }
 
 .kpi-label {
-  font-size: 0.85rem;
-  color: #666;
-  margin-top: 4px;
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.72);
+  margin-top: 5px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
 }
 
+.kpi-card mat-card-actions {
+  padding: 4px 20px 14px !important;
+}
+.kpi-card mat-card-actions a {
+  color: rgba(255,255,255,0.75) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.2px;
+  transition: color 0.15s;
+}
+.kpi-card mat-card-actions a:hover { color: #fff !important; }
+
+/* ── Alerts card ───────────────────────────────────────────────── */
 .alerts-card {
-  border-radius: 12px !important;
+  border-radius: 16px !important;
+  overflow: hidden;
 }
 
+.alerts-card mat-card-header {
+  padding: 20px 20px 0 !important;
+  align-items: center;
+}
+
+.alerts-card mat-card-title {
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  color: #1a237e !important;
+}
+
+.alerts-card mat-card-subtitle {
+  font-size: 0.8rem !important;
+  color: #6b7280 !important;
+}
+
+/* Empty state */
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2rem;
+  padding: 2.5rem 2rem;
   color: #4caf50;
-  gap: 8px;
+  gap: 10px;
+  text-align: center;
 }
-
 .empty-state mat-icon {
-  font-size: 48px;
-  width: 48px;
-  height: 48px;
+  font-size: 52px;
+  width: 52px;
+  height: 52px;
+  opacity: 0.7;
+}
+.empty-state p {
+  font-size: 0.9rem;
+  color: #6b7280;
+  font-weight: 500;
 }
 
+/* Alerts list */
 .alerts-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 8px 0;
+  padding: 12px 0 4px;
 }
 
 .alert-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 12px;
-  background: #fff8e1;
-  border-radius: 8px;
-  border-left: 4px solid #ff9800;
+  padding: 12px 16px;
+  background: #fffbf0;
+  border-radius: 10px;
+  border-left: 4px solid #f59e0b;
+  transition: background 0.15s;
 }
+.alert-item:hover { background: #fff8e1; }
 
 .alert-info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
 }
 
 .alert-code {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.85rem;
   color: #1a237e;
 }
 
 .alert-desc {
   font-size: 0.8rem;
-  color: #555;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .alert-stock {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 .stock-value {
-  font-size: 0.85rem;
-  color: #666;
+  font-size: 0.82rem;
+  color: #6b7280;
+  font-weight: 500;
 }
 
-.chip-critico { background-color: #ffcdd2 !important; color: #c62828 !important; }
-.chip-alto { background-color: #ffe0b2 !important; color: #e65100 !important; }
-.chip-medio { background-color: #fff9c4 !important; color: #f57f17 !important; }
-.chip-bajo { background-color: #e8f5e9 !important; color: #2e7d32 !important; }
-
 .card-footer {
-  padding: 8px 0 0;
+  padding: 10px 0 4px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ── Error card ────────────────────────────────────────────────── */
+.error-card mat-card-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 1.25rem !important;
+  color: #c62828;
+  font-weight: 500;
+}
+
+/* ── Refresh button ────────────────────────────────────────────── */
+.refresh-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 120px;
+  justify-content: center;
+}
+
+.refresh-btn[disabled] {
+  opacity: 0.7;
+}
+
+.btn-spinner {
+  display: inline-flex !important;
+  flex-shrink: 0;
+}
+
+/* Spin animation on the refresh icon when NOT loading (hover) */
+.refresh-btn:not([disabled]):hover mat-icon {
+  animation: spin-once 0.5s ease;
+}
+
+@keyframes spin-once {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }

@@ -1,42 +1,281 @@
-/* Global styles for Comercial Chemical S.A.S. */
+/* ══════════════════════════════════════════════════════════════════
+   CHEM-MODINV  ·  Global Design System
+   Comercial Chemical S.A.S.
+══════════════════════════════════════════════════════════════════ */
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ── Design Tokens ─────────────────────────────────────────────── */
+:root {
+  /* Brand */
+  --brand-900: #0d1b6e;
+  --brand-800: #1a237e;
+  --brand-700: #283593;
+  --brand-600: #3949ab;
+  --brand-500: #5c6bc0;
+  --brand-400: #7986cb;
+  --brand-100: #e8eaf6;
+  --brand-50:  #f3f4fd;
+
+  /* Accent */
+  --accent-600: #1565c0;
+  --accent-500: #1e88e5;
+  --accent-400: #42a5f5;
+  --accent-100: #e3f2fd;
+
+  /* Semantic */
+  --success-700: #1b5e20;
+  --success-500: #2e7d32;
+  --success-100: #e8f5e9;
+  --warn-700:    #b71c1c;
+  --warn-500:    #c62828;
+  --warn-100:    #ffebee;
+  --orange-700:  #bf360c;
+  --orange-500:  #e65100;
+  --orange-100:  #fbe9e7;
+  --info-500:    #0288d1;
+  --info-100:    #e1f5fe;
+
+  /* Neutrals */
+  --gray-900: #111827;
+  --gray-700: #374151;
+  --gray-500: #6b7280;
+  --gray-400: #9ca3af;
+  --gray-200: #e5e7eb;
+  --gray-100: #f3f4f6;
+  --gray-50:  #f9fafb;
+  --white:    #ffffff;
+
+  /* Surface */
+  --bg:        #f0f2f8;
+  --surface:   #ffffff;
+  --border:    #e4e9f4;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-sm: 0 1px 4px rgba(26,35,126,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md: 0 4px 16px rgba(26,35,126,.08), 0 2px 6px rgba(0,0,0,.04);
+  --shadow-lg: 0 10px 32px rgba(26,35,126,.12), 0 4px 12px rgba(0,0,0,.06);
+  --shadow-xl: 0 20px 48px rgba(26,35,126,.16), 0 8px 20px rgba(0,0,0,.08);
+
+  /* Radius */
+  --r-sm:  6px;
+  --r-md:  10px;
+  --r-lg:  14px;
+  --r-xl:  20px;
+  --r-full: 9999px;
+
+  /* Transitions */
+  --ease:   cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --t-fast: 0.15s;
+  --t-base: 0.22s;
+  --t-slow: 0.35s;
+
+  /* Material overrides */
+  --mat-sys-primary:           var(--brand-800);
+  --mat-sys-on-primary:        #ffffff;
+  --mat-sys-secondary:         var(--accent-500);
+  --mat-sys-on-secondary:      #ffffff;
+  --mat-sys-error:             var(--warn-500);
+  --mdc-outlined-text-field-focus-outline-color:    var(--brand-800);
+  --mdc-outlined-text-field-focus-label-text-color: var(--brand-800);
+}
+
+/* ── Base Reset ────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
 
 html, body {
   height: 100%;
   margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
-  background-color: #f5f5f5;
+  background: var(--bg);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  color: var(--gray-900);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
-/* Snackbar error style */
-.snack-error .mdc-snackbar__surface {
-  background-color: #c62828 !important;
+/* ── Typography helpers ────────────────────────────────────────── */
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 1.5rem;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--brand-800);
+  letter-spacing: -0.3px;
+}
+.page-title mat-icon,
+.page-title .material-icons {
+  font-size: 26px;
+  width: 26px;
+  height: 26px;
+  color: var(--brand-600);
 }
 
-/* Material table improvements */
-.mat-mdc-table {
-  background: white;
+/* ── Page layout helpers ───────────────────────────────────────── */
+.page-container {
+  max-width: 1280px;
+  animation: fadeUp var(--t-slow) var(--ease-out) both;
 }
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* ── Material Cards ────────────────────────────────────────────── */
+.mat-mdc-card {
+  border-radius: var(--r-lg) !important;
+  box-shadow: var(--shadow-md) !important;
+  border: 1px solid var(--border) !important;
+  background: var(--surface) !important;
+}
+
+/* ── Material Tables ───────────────────────────────────────────── */
+.mat-mdc-table { background: var(--surface) !important; }
 
 .mat-mdc-header-row {
-  background-color: #f5f5f5;
+  background: linear-gradient(90deg, var(--brand-50) 0%, #f8f9fe 100%) !important;
 }
 
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+.mat-mdc-header-cell {
+  color: var(--brand-800) !important;
+  font-weight: 700 !important;
+  font-size: 0.7rem !important;
+  letter-spacing: 0.8px !important;
+  text-transform: uppercase !important;
+  border-bottom: 2px solid var(--brand-100) !important;
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
+.mat-mdc-row { transition: background var(--t-fast) var(--ease); }
+.mat-mdc-row:hover { background: var(--brand-50) !important; }
+
+/* ── Material Buttons ──────────────────────────────────────────── */
+.mat-mdc-raised-button.mat-primary {
+  border-radius: var(--r-md) !important;
+  box-shadow: 0 2px 8px rgba(26,35,126,.25) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.2px !important;
+  transition: box-shadow var(--t-base) var(--ease), transform var(--t-fast) var(--ease) !important;
+}
+.mat-mdc-raised-button.mat-primary:hover {
+  box-shadow: 0 6px 18px rgba(26,35,126,.32) !important;
+  transform: translateY(-1px);
 }
 
-::-webkit-scrollbar-thumb {
-  background: #bbb;
-  border-radius: 3px;
+.mat-mdc-outlined-button,
+.mat-mdc-stroked-button {
+  border-radius: var(--r-md) !important;
+  font-weight: 500 !important;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #888;
+/* ── Material Form Fields ──────────────────────────────────────── */
+.mat-mdc-form-field {
+  --mdc-outlined-text-field-focus-outline-color:    var(--brand-800);
+  --mdc-outlined-text-field-focus-label-text-color: var(--brand-800);
+}
+
+/* ── Material Chips ────────────────────────────────────────────── */
+.chip-ok     { background: var(--success-100) !important; color: var(--success-500) !important; font-weight: 600 !important; }
+.chip-warn   { background: var(--orange-100)  !important; color: var(--orange-500)  !important; font-weight: 600 !important; }
+.chip-error  { background: var(--warn-100)    !important; color: var(--warn-500)    !important; font-weight: 600 !important; }
+.chip-info   { background: var(--info-100)    !important; color: var(--info-500)    !important; font-weight: 600 !important; }
+
+.chip-entrada { background: var(--success-100) !important; color: var(--success-500) !important; font-weight: 600 !important; }
+.chip-salida  { background: var(--warn-100)    !important; color: var(--warn-500)    !important; font-weight: 600 !important; }
+.chip-ajuste  { background: var(--accent-100)  !important; color: var(--accent-600)  !important; font-weight: 600 !important; }
+
+.chip-critico { background: var(--warn-100)    !important; color: var(--warn-500)    !important; font-weight: 700 !important; }
+.chip-alto    { background: var(--orange-100)  !important; color: var(--orange-500)  !important; font-weight: 600 !important; }
+.chip-medio   { background: #fff9c4            !important; color: #f57f17            !important; font-weight: 600 !important; }
+.chip-bajo    { background: var(--success-100) !important; color: var(--success-500) !important; font-weight: 600 !important; }
+
+/* ── Material Snackbar ─────────────────────────────────────────── */
+.mdc-snackbar__surface { border-radius: var(--r-md) !important; }
+.snack-error .mdc-snackbar__surface { background: var(--warn-500) !important; }
+.snack-success .mdc-snackbar__surface { background: var(--success-500) !important; }
+
+/* ── Material Paginator ────────────────────────────────────────── */
+.mat-mdc-paginator {
+  border-top: 1px solid var(--border) !important;
+  background: var(--gray-50) !important;
+  border-radius: 0 0 var(--r-lg) var(--r-lg) !important;
+}
+
+/* ── Material Dialog ───────────────────────────────────────────── */
+.mat-mdc-dialog-surface {
+  border-radius: var(--r-xl) !important;
+  overflow: hidden;
+  box-shadow: var(--shadow-xl) !important;
+}
+
+/* ── Loading center ────────────────────────────────────────────── */
+.loading-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  gap: 1rem;
+  color: var(--gray-500);
+}
+
+/* ── Error message ─────────────────────────────────────────────── */
+.error-msg {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 1rem 1.25rem;
+  color: var(--warn-500);
+  background: var(--warn-100);
+  border-radius: var(--r-md);
+  font-weight: 500;
+}
+
+/* ── Empty state ───────────────────────────────────────────────── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem 2rem;
+  color: var(--gray-400);
+  gap: 10px;
+  text-align: center;
+}
+.empty-state mat-icon,
+.empty-state .material-icons {
+  font-size: 52px;
+  width: 52px;
+  height: 52px;
+  opacity: 0.5;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────────── */
+::-webkit-scrollbar          { width: 5px; height: 5px; }
+::-webkit-scrollbar-track    { background: transparent; }
+::-webkit-scrollbar-thumb    { background: var(--brand-400); border-radius: var(--r-full); opacity: 0.5; }
+::-webkit-scrollbar-thumb:hover { background: var(--brand-600); }
+
+/* ── Animations ────────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
 }

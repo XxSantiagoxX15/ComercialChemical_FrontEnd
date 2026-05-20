@@ -1,22 +1,28 @@
-.page-container { max-width: 1200px; }
+/* ── Artículos ─────────────────────────────────────────────────── */
+.page-container { max-width: 1280px; }
 
 .page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .page-title {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   margin: 0;
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-size: 1.45rem;
+  font-weight: 800;
   color: #1a237e;
+  letter-spacing: -0.3px;
 }
+.page-title mat-icon { font-size: 26px; width: 26px; height: 26px; color: #3949ab; }
 
+/* Filter row */
 .filter-row {
   display: flex;
   align-items: center;
@@ -24,37 +30,36 @@
   margin-bottom: 1rem;
   flex-wrap: wrap;
 }
+.search-field { flex: 1; min-width: 220px; }
 
-.search-field { flex: 1; min-width: 200px; }
-
-.loading-center {
-  display: flex;
-  justify-content: center;
-  padding: 3rem;
-}
-
-.error-msg {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 1rem;
-  color: #c62828;
-}
-
-.table-wrapper { overflow-x: auto; }
-
+/* Table */
+.table-wrapper { overflow-x: auto; border-radius: 0 0 12px 12px; }
 .full-width { width: 100%; }
 
-.table-row:hover { background: #f5f5f5; }
+.stock-low { color: #c62828; font-weight: 700; }
 
-.stock-low { color: #c62828; font-weight: 600; }
+.total-vendido { color: #1a237e; font-weight: 600; }
+.sin-ventas    { color: #9ca3af; }
 
-.chip-ok { background-color: #e8f5e9 !important; color: #2e7d32 !important; }
-.chip-warn { background-color: #fff3e0 !important; color: #e65100 !important; }
-.chip-error { background-color: #ffebee !important; color: #c62828 !important; }
+/* Valor vendido */
+.valor-normal  { color: #374151; font-weight: 500; }
+.valor-ganancia {
+  color: #2e7d32;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.ganancia-icon {
+  font-size: 15px !important;
+  width: 15px !important;
+  height: 15px !important;
+  color: #2e7d32;
+}
 
 .no-data {
   text-align: center;
-  padding: 2rem;
-  color: #999;
+  padding: 3rem;
+  color: #9ca3af;
+  font-size: 0.9rem;
 }

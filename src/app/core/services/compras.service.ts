@@ -30,4 +30,26 @@ export class ComprasService {
   actualizarEstado(id: number, estado: string): Observable<any> {
     return this.http.put(`${this.base}/api/compras/ordenes/${id}/`, { estado });
   }
+
+  getProveedores(): Observable<any> {
+    return this.http.get(`${this.base}/api/compras/proveedores/`);
+  }
+
+  cotizarArticulo(articuloId: number): Observable<any> {
+    return this.http.get(`${this.base}/api/compras/cotizador/`, {
+      params: new HttpParams().set('articulo_id', articuloId)
+    });
+  }
+
+  catalogoProveedor(nombre: string): Observable<any> {
+    return this.http.get(`${this.base}/api/compras/cotizador/`, {
+      params: new HttpParams().set('proveedor', nombre)
+    });
+  }
+
+  cotizarLista(ids: number[]): Observable<any> {
+    return this.http.get(`${this.base}/api/compras/cotizador/`, {
+      params: new HttpParams().set('articulos', ids.join(','))
+    });
+  }
 }

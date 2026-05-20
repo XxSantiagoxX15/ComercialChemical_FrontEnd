@@ -41,7 +41,7 @@ export class AuditoriaComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  displayedColumns = ['fecha', 'usuario', 'tipo_accion', 'descripcion', 'ip'];
+  displayedColumns = ['fecha', 'usuario', 'tipo_accion', 'descripcion', 'entidad', 'ip'];
   dataSource = new MatTableDataSource<any>([]);
   loading = false;
   error: string | null = null;
@@ -50,13 +50,18 @@ export class AuditoriaComponent implements OnInit {
   filtroUsuarioId = '';
 
   tiposAccion = [
-    { value: '', label: 'Todos' },
-    { value: 'crear', label: 'Crear' },
-    { value: 'actualizar', label: 'Actualizar' },
-    { value: 'eliminar', label: 'Eliminar' },
-    { value: 'login', label: 'Login' },
-    { value: 'logout', label: 'Logout' },
-    { value: 'importar', label: 'Importar' },
+    { value: '',                  label: 'Todos' },
+    { value: 'LOGIN',             label: 'Login' },
+    { value: 'LOGOUT',            label: 'Logout' },
+    { value: 'CREAR_USUARIO',     label: 'Crear Usuario' },
+    { value: 'ACTUALIZAR_USUARIO',label: 'Actualizar Usuario' },
+    { value: 'RESET_PASSWORD',    label: 'Reset Password' },
+    { value: 'CUENTA_BLOQUEADA',  label: 'Cuenta Bloqueada' },
+    { value: 'CREAR_ARTICULO',    label: 'Crear Artículo' },
+    { value: 'ACTUALIZAR_ARTICULO', label: 'Actualizar Artículo' },
+    { value: 'MOVIMIENTO_INVENTARIO', label: 'Movimiento Inventario' },
+    { value: 'CREAR_ORDEN_COMPRA',label: 'Crear Orden Compra' },
+    { value: 'RECIBIR_ORDEN_COMPRA', label: 'Recibir Orden' },
   ];
 
   ngOnInit() {
@@ -68,11 +73,12 @@ export class AuditoriaComponent implements OnInit {
     this.error = null;
     const params: any = {};
     if (this.filtroTipoAccion) params.tipo_accion = this.filtroTipoAccion;
-    if (this.filtroUsuarioId) params.usuario_id = this.filtroUsuarioId;
+    if (this.filtroUsuarioId)  params.usuario_id  = this.filtroUsuarioId;
 
     this.auditoriaSvc.getEventos(params).subscribe({
       next: (res: any) => {
-        const data = Array.isArray(res) ? res : (res.results ?? []);
+        // Backend retorna { eventos: [...], total: N }
+        const data = res?.eventos ?? (Array.isArray(res) ? res : []);
         this.dataSource.data = data;
         setTimeout(() => {
           this.dataSource.paginator = this.paginator;
@@ -88,26 +94,29 @@ export class AuditoriaComponent implements OnInit {
   }
 
   getAccionChip(accion: string): string {
-    const map: any = {
-      crear: 'chip-crear',
-      actualizar: 'chip-actualizar',
-      eliminar: 'chip-eliminar',
-      login: 'chip-login',
-      logout: 'chip-logout',
-      importar: 'chip-importar',
-    };
-    return map[accion?.toLowerCase()] ?? 'chip-default';
+    if (!accion) return 'chip-default';
+    const a = accion.toUpperCase();
+    if (a.includes('LOGIN'))    return 'chip-login';
+    if (a.includes('LOGOUT'))   return 'chip-logout';
+    if (a.includes('CREAR') || a.includes('CREATE')) return 'chip-crear';
+    if (a.includes('ACTUALIZ') || a.includes('UPDATE')) return 'chip-actualizar';
+    if (a.includes('ELIMIN') || a.includes('DELETE'))   return 'chip-eliminar';
+    if (a.includes('IMPORT'))   return 'chip-importar';
+    if (a.includes('BLOQUEA'))  return 'chip-eliminar';
+    if (a.includes('RESET'))    return 'chip-actualizar';
+    return 'chip-default';
   }
 
   getAccionLabel(accion: string): string {
+    if (!accion) return '—';
     const map: any = {
-      crear: 'Crear',
-      actualizar: 'Actualizar',
-      eliminar: 'Eliminar',
-      login: 'Login',
-      logout: 'Logout',
-      importar: 'Importar',
+      LOGIN: 'Login', LOGOUT: 'Logout',
+      CREAR_USUARIO: 'Crear Usuario', ACTUALIZAR_USUARIO: 'Actualizar Usuario',
+      RESET_PASSWORD: 'Reset Password', CUENTA_BLOQUEADA: 'Cuenta Bloqueada',
+      CREAR_ARTICULO: 'Crear Artículo', ACTUALIZAR_ARTICULO: 'Actualizar Artículo',
+      MOVIMIENTO_INVENTARIO: 'Movimiento', CREAR_ORDEN_COMPRA: 'Crear Orden',
+      RECIBIR_ORDEN_COMPRA: 'Recibir Orden', CREAR_KIT: 'Crear Kit',
     };
-    return map[accion?.toLowerCase()] ?? accion;
+    return map[accion] ?? accion;
   }
 }

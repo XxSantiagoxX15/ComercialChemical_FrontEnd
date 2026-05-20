@@ -1,64 +1,108 @@
 .page-container { max-width: 1200px; }
 
 .page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
+  display: flex; align-items: center;
+  justify-content: space-between; margin-bottom: 1.5rem;
 }
 
 .page-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #1a237e;
+  display: flex; align-items: center; gap: 8px;
+  margin: 0; font-size: 1.5rem; font-weight: 600; color: #1a237e;
 }
+
+.tab-icon { font-size: 18px; width: 18px; height: 18px; margin-right: 6px; vertical-align: middle; }
 
 .tab-content {
   padding: 1.5rem 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  display: flex; flex-direction: column; gap: 1rem;
 }
 
-.calc-card, .results-card { border-radius: 12px !important; }
-
-.calc-form {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding-top: 8px;
-}
-
-.form-row {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.flex1 { flex: 1; min-width: 120px; }
-.flex2 { flex: 2; min-width: 200px; }
+/* ── Formulario ──────────────────────────────────────────────────────── */
+.forecast-form { display: flex; flex-direction: column; gap: 16px; padding-top: 8px; }
+.forecast-actions { display: flex; justify-content: flex-end; }
+.forecast-btn { padding: 0 28px !important; height: 44px !important; font-size: 0.95rem !important; font-weight: 600 !important; }
 .full { width: 100%; }
 
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  padding-top: 4px;
+/* ── Gráficas ────────────────────────────────────────────────────────── */
+.chart-card { border-radius: 12px !important; }
+
+.chart-wrap {
+  position: relative;
+  height: 320px;
+  padding: 8px 0;
 }
 
-.loading-center {
-  display: flex;
-  justify-content: center;
-  padding: 3rem;
+.chart-horizontal { height: 380px; }
+
+/* ── Estadísticas ────────────────────────────────────────────────────── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
 }
 
+@media (max-width: 700px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.stat-card { background: #f0f2ff; border-radius: 10px; padding: 14px; text-align: center; }
+.stat-value { font-size: 1.4rem; font-weight: 700; color: #1a237e; }
+.stat-label { font-size: 0.75rem; color: #666; margin-top: 4px; }
+
+.tendencia-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 0.9rem; font-weight: 600; padding: 2px 8px; border-radius: 12px;
+}
+.tendencia-badge.creciente   { background: #e8f5e9; color: #2e7d32; }
+.tendencia-badge.decreciente { background: #ffebee; color: #c62828; }
+
+/* ── Tabla resultados ────────────────────────────────────────────────── */
+.results-table td { padding-top: 10px; padding-bottom: 10px; }
+
+.demand-value { font-size: 1rem; font-weight: 600; color: #1a237e; }
+.demand-value.high { color: #e65100; }
+
+.forecast-bar-wrap { display: flex; align-items: center; gap: 8px; min-width: 140px; }
+.forecast-bar { height: 8px; border-radius: 4px; background: #3949ab; min-width: 4px; transition: width 0.3s; }
+.forecast-bar.high { background: #e65100; }
+.bar-pct { font-size: 0.75rem; color: #888; white-space: nowrap; }
+.bar-sample { display: inline-block; width: 24px; height: 8px; border-radius: 4px; background: #3949ab; vertical-align: middle; }
+.bar-sample.high { background: #e65100; }
+
+.stock-hint { display: flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 0.82rem; color: #555; }
+.stock-hint mat-icon { font-size: 16px; width: 16px; height: 16px; color: #3949ab; }
+
+/* ── Ranking ─────────────────────────────────────────────────────────── */
+.rank-badge { display: inline-block; font-weight: 700; font-size: 0.85rem; color: #555; min-width: 28px; }
+.rank-badge.top3 { color: #e65100; }
+
+/* ── Filtro recomendaciones ──────────────────────────────────────────── */
+.filter-card { border-radius: 12px !important; }
+.filter-card mat-card-content { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding-top: 12px !important; }
+.filter-field { flex: 1; min-width: 260px; }
+.filter-count { font-size: 0.82rem; color: #666; white-space: nowrap; }
+
+/* ── Chips prioridad ─────────────────────────────────────────────────── */
+.prioridad-chip { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; }
+.prioridad-critico { background: #ffebee; color: #c62828; }
+.prioridad-alto    { background: #fff3e0; color: #e65100; }
+.prioridad-medio   { background: #fffde7; color: #f57f17; }
+.prioridad-bajo    { background: #e8f5e9; color: #2e7d32; }
+
+/* ── Error ───────────────────────────────────────────────────────────── */
+.error-calc {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: #fff3e0; color: #e65100;
+  border-radius: 8px; padding: 12px 16px;
+  border-left: 4px solid #e65100;
+}
+.error-calc mat-icon { margin-top: 2px; flex-shrink: 0; }
+
+/* ── Sin datos ───────────────────────────────────────────────────────── */
+.no-data-msg { text-align: center; padding: 3rem; color: #999; }
+.no-data-msg mat-icon { font-size: 48px; width: 48px; height: 48px; display: block; margin: 0 auto 12px; color: #ccc; }
+
+/* ── Utilidades ──────────────────────────────────────────────────────── */
+.loading-center { display: flex; justify-content: center; padding: 3rem; }
 .full-width { width: 100%; }
-
-.no-data {
-  text-align: center;
-  padding: 2rem;
-  color: #999;
-}
+.table-wrapper { overflow-x: auto; }
+.table-row:hover { background: #f5f7ff; }
+.text-muted { color: #888; }

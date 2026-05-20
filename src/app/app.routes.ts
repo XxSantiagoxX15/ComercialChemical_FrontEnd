@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/guards/auth-guard';
+import { authGuard, adminGuard } from './core/guards/auth-guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -14,11 +14,6 @@ export const routes: Routes = [
       import('./layout/components/layout-shell/layout-shell.component').then(m => m.LayoutShellComponent),
     canActivate: [authGuard],
     children: [
-      {
-        path: 'home',
-        loadComponent: () =>
-          import('./features/home/home.component').then(m => m.HomeComponent),
-      },
       {
         path: 'dashboard',
         loadComponent: () =>
@@ -51,15 +46,23 @@ export const routes: Routes = [
       },
       {
         path: 'importacion',
+        canActivate: [adminGuard],
         loadComponent: () =>
           import('./features/importacion/importacion.component').then(m => m.ImportacionComponent),
       },
       {
+        path: 'usuarios',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/usuarios/usuarios.component').then(m => m.UsuariosComponent),
+      },
+      {
         path: 'auditoria',
+        canActivate: [adminGuard],
         loadComponent: () =>
           import('./features/auditoria/auditoria.component').then(m => m.AuditoriaComponent),
       },
-      { path: '', redirectTo: 'home', pathMatch: 'full' },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],
   },
   { path: '**', redirectTo: 'login' },

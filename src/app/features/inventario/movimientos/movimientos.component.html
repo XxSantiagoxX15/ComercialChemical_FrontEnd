@@ -4,6 +4,10 @@
       <mat-icon>swap_horiz</mat-icon>
       Movimientos de Inventario
     </h1>
+    <button mat-stroked-button (click)="cargarMovimientos()" [disabled]="loading">
+      <mat-icon>refresh</mat-icon>
+      Actualizar
+    </button>
   </div>
 
   <!-- Formulario nuevo movimiento -->

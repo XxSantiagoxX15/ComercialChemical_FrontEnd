@@ -4,9 +4,16 @@
       <mat-icon>dashboard</mat-icon>
       Dashboard
     </h1>
-    <button mat-stroked-button (click)="cargarDatos()" [disabled]="loading">
-      <mat-icon>refresh</mat-icon>
-      Actualizar
+    <button mat-stroked-button (click)="cargarDatos()" [disabled]="loading" class="refresh-btn">
+      @if (loading) {
+        <mat-spinner diameter="16" class="btn-spinner"></mat-spinner>
+        Cargando...
+      } @else {
+        <ng-container>
+          <mat-icon>refresh</mat-icon>
+          Actualizar
+        </ng-container>
+      }
     </button>
   </div>
 
@@ -62,12 +69,16 @@
             <mat-icon>shopping_cart</mat-icon>
           </div>
           <div class="kpi-info">
-            <div class="kpi-value">{{ ordenesPendientes }}</div>
+            <div class="kpi-value">{{ ordenesPendientes !== null ? ordenesPendientes : '—' }}</div>
             <div class="kpi-label">Órdenes Pendientes</div>
           </div>
         </mat-card-content>
         <mat-card-actions>
-          <a mat-button routerLink="/compras/ordenes">Ver órdenes →</a>
+          @if (puedeVerCompras) {
+            <a mat-button routerLink="/compras/ordenes">Ver órdenes →</a>
+          } @else {
+            <span style="font-size:12px; color:#999; padding: 0 8px;">Sin acceso</span>
+          }
         </mat-card-actions>
       </mat-card>
 
@@ -86,6 +97,24 @@
         </mat-card-actions>
       </mat-card>
     </div>
+
+    <!-- Gráfica stock crítico -->
+    @if (stockCritico.length > 0) {
+      <mat-card class="chart-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon style="color:#c62828;vertical-align:middle;margin-right:6px">bar_chart</mat-icon>
+            Stock Actual vs. Mínimo
+          </mat-card-title>
+          <mat-card-subtitle>Artículos con stock crítico — línea verde = mínimo requerido</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chart-wrap">
+            <canvas id="chartStockCritico"></canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
 
     <!-- Alertas recientes -->
     <mat-card class="alerts-card">

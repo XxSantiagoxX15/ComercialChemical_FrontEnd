@@ -5,11 +5,6 @@
   </div>
 
   <mat-nav-list class="nav-list">
-    <!-- Inicio -->
-    <a mat-list-item routerLink="/home" routerLinkActive="active-link" class="nav-item">
-      <mat-icon matListItemIcon>home</mat-icon>
-      <span matListItemTitle>Inicio</span>
-    </a>
 
     <!-- Dashboard -->
     <a mat-list-item routerLink="/dashboard" routerLinkActive="active-link" class="nav-item">
@@ -52,17 +47,23 @@
       <span matListItemTitle>Pronósticos</span>
     </a>
 
-    <!-- Importación -->
-    <a mat-list-item routerLink="/importacion" routerLinkActive="active-link" class="nav-item">
-      <mat-icon matListItemIcon>upload_file</mat-icon>
-      <span matListItemTitle>Importación</span>
-    </a>
+    <!-- Importación (solo admin) -->
+    @if (isAdmin) {
+      <a mat-list-item routerLink="/importacion" routerLinkActive="active-link" class="nav-item">
+        <mat-icon matListItemIcon>upload_file</mat-icon>
+        <span matListItemTitle>Importación</span>
+      </a>
+    }
 
     <!-- Auditoría (solo admin) -->
     @if (isAdmin) {
       <a mat-list-item routerLink="/auditoria" routerLinkActive="active-link" class="nav-item">
         <mat-icon matListItemIcon>manage_search</mat-icon>
         <span matListItemTitle>Auditoría</span>
+      </a>
+      <a mat-list-item routerLink="/usuarios" routerLinkActive="active-link" class="nav-item">
+        <mat-icon matListItemIcon>group</mat-icon>
+        <span matListItemTitle>Usuarios</span>
       </a>
     }
   </mat-nav-list>

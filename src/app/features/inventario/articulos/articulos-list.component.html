@@ -69,6 +69,34 @@
               <td mat-cell *matCellDef="let row">{{ row.stock_minimo }}</td>
             </ng-container>
 
+            <ng-container matColumnDef="total_vendido">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Cant. Vendida</th>
+              <td mat-cell *matCellDef="let row">
+                @if (row.total_vendido > 0) {
+                  <span class="total-vendido">{{ row.total_vendido | number:'1.0-0' }} {{ row.unidad_medida }}</span>
+                } @else {
+                  <span class="sin-ventas">—</span>
+                }
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="valor_vendido">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Valor Vendido</th>
+              <td mat-cell *matCellDef="let row">
+                @if (row.valor_vendido && row.valor_vendido !== 0) {
+                  <span [class]="getValorClass(row.valor_vendido)"
+                        [matTooltip]="row.valor_vendido < 0 ? 'Valor negativo = ingreso neto para la empresa' : ''">
+                    {{ formatCOP(row.valor_vendido) }}
+                    @if (row.valor_vendido < 0) {
+                      <mat-icon class="ganancia-icon" matTooltip="Ganancia">trending_up</mat-icon>
+                    }
+                  </span>
+                } @else {
+                  <span class="sin-ventas">—</span>
+                }
+              </td>
+            </ng-container>
+
             <ng-container matColumnDef="estado">
               <th mat-header-cell *matHeaderCellDef>Estado</th>
               <td mat-cell *matCellDef="let row">

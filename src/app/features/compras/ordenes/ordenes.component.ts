@@ -137,7 +137,7 @@ export class OrdenesComponent implements OnInit {
       next: () => {
         this.saving = false;
         this.snackBar.open('Orden creada correctamente', 'Cerrar', { duration: 3000 });
-        this.ordenForm.reset({ cantidad_solicitada: 1, precio_unitario: 0 });
+        this.ordenForm.reset({ articulo: null, cantidad_solicitada: 1, precio_unitario: 0, proveedor: '', observaciones: '' });
         this.articuloSearch = '';
         this.articuloSeleccionado = null;
         this.cargarOrdenes();

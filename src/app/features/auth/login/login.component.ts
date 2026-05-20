@@ -41,7 +41,7 @@ export class LoginComponent {
       next: (res) => {
         this.isLoading = false;
         this.auth.saveSession(res);
-        this.router.navigate(['/home']);
+        this.router.navigate(['/dashboard']);
       },
       error: () => {
         this.isLoading    = false;

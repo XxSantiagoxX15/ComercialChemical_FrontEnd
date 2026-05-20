@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
@@ -49,7 +49,7 @@ export class ArticulosListComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  displayedColumns = ['codigo', 'descripcion', 'categoria', 'stock_actual', 'stock_minimo', 'estado', 'acciones'];
+  displayedColumns = ['codigo', 'descripcion', 'categoria', 'stock_actual', 'stock_minimo', 'total_vendido', 'valor_vendido', 'estado', 'acciones'];
   dataSource = new MatTableDataSource<any>([]);
   loading = false;
   error: string | null = null;
@@ -110,5 +110,20 @@ export class ArticulosListComponent implements OnInit {
     if (articulo.stock_actual <= 0) return { label: 'Sin stock', clase: 'chip-error' };
     if (articulo.stock_actual <= articulo.stock_minimo) return { label: 'Crítico', clase: 'chip-warn' };
     return { label: 'Normal', clase: 'chip-ok' };
+  }
+
+  formatCOP(valor: number): string {
+    if (!valor && valor !== 0) return '—';
+    const abs = Math.abs(valor);
+    const formatted = new Intl.NumberFormat('es-CO', {
+      style: 'currency', currency: 'COP',
+      minimumFractionDigits: 0, maximumFractionDigits: 0
+    }).format(abs);
+    return valor < 0 ? `+${formatted}` : formatted;
+  }
+
+  getValorClass(valor: number): string {
+    if (!valor) return '';
+    return valor < 0 ? 'valor-ganancia' : 'valor-normal';
   }
 }

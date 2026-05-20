@@ -23,7 +23,19 @@ export class AuthService {
   saveSession(res: any) {
     if (res.access_token)  localStorage.setItem('token', res.access_token);
     if (res.refresh_token) localStorage.setItem('refresh_token', res.refresh_token);
-    if (res.user)          localStorage.setItem('user', JSON.stringify(res.user));
+    if (res.user) {
+      // Normalizar: guardar rol como nombre string (no como ID numérico)
+      const user = { ...res.user };
+      // El backend retorna user.rol como ID, pero el JWT tiene el nombre en claim 'rol'
+      // Extraemos el nombre del rol del JWT
+      if (res.access_token) {
+        try {
+          const payload = JSON.parse(atob(res.access_token.split('.')[1]));
+          if (payload.rol) user.rol = payload.rol;
+        } catch { /* mantener el valor original */ }
+      }
+      localStorage.setItem('user', JSON.stringify(user));
+    }
   }
 
   getToken(): string | null {
