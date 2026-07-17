@@ -56,6 +56,22 @@
         </mat-form-field>
       </div>
 
+      @if (esEntrada) {
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="flex1">
+            <mat-label>Número de Lote</mat-label>
+            <input matInput formControlName="numero_lote" placeholder="Ej: L-2026-001 (opcional)">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="flex1">
+            <mat-label>Fecha de Vencimiento</mat-label>
+            <input matInput [matDatepicker]="pickerVencimiento" formControlName="fecha_vencimiento">
+            <mat-datepicker-toggle matSuffix [for]="pickerVencimiento"></mat-datepicker-toggle>
+            <mat-datepicker #pickerVencimiento></mat-datepicker>
+          </mat-form-field>
+        </div>
+      }
+
       <mat-form-field appearance="outline" class="full">
         <mat-label>Observaciones</mat-label>
         <textarea matInput formControlName="observaciones" rows="2" placeholder="Notas adicionales..."></textarea>

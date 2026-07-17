@@ -6,6 +6,7 @@ import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
@@ -29,6 +30,7 @@ import { ArticuloFormComponent } from './articulo-form.component';
     MatSortModule,
     MatFormFieldModule,
     MatInputModule,
+    MatSelectModule,
     MatButtonModule,
     MatIconModule,
     MatChipsModule,
@@ -46,31 +48,56 @@ export class ArticulosListComponent implements OnInit {
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+  // La tabla vive dentro de un @if(loading) que la destruye y recrea en cada carga,
+  // así que MatSort/MatPaginator son instancias nuevas cada vez. Se conectan al
+  // dataSource apenas Angular las crea, en vez de adivinar con un setTimeout.
+  @ViewChild(MatPaginator) set paginatorRef(mp: MatPaginator | undefined) {
+    if (mp) this.dataSource.paginator = mp;
+  }
 
-  displayedColumns = ['codigo', 'descripcion', 'categoria', 'stock_actual', 'stock_minimo', 'total_vendido', 'valor_vendido', 'estado', 'acciones'];
+  @ViewChild(MatSort) set sortRef(ms: MatSort | undefined) {
+    if (ms) this.dataSource.sort = ms;
+  }
+
+  displayedColumns = ['codigo', 'descripcion', 'categoria', 'tipo_producto', 'stock_actual', 'stock_minimo', 'total_vendido', 'valor_vendido', 'estado', 'acciones'];
   dataSource = new MatTableDataSource<any>([]);
   loading = false;
   error: string | null = null;
   busqueda = '';
+  tipoProducto = '';
 
   ngOnInit() {
+    // El backend serializa los DecimalField (stock_actual, stock_minimo) como texto
+    // (ej: "2.130"), y por defecto MatSort los ordena alfabéticamente en vez de
+    // numéricamente. Se fuerza la conversión a número solo en las columnas numéricas.
+    this.dataSource.sortingDataAccessor = (item: any, property: string) => {
+      switch (property) {
+        case 'stock_actual':
+        case 'stock_minimo':
+        case 'total_vendido':
+        case 'valor_vendido':
+          return parseFloat(item[property]) || 0;
+        default:
+          return item[property];
+      }
+    };
     this.cargarArticulos();
   }
 
   cargarArticulos() {
     this.loading = true;
     this.error = null;
-    this.inventarioSvc.getArticulos({ buscar: this.busqueda, limit: 500 }).subscribe({
+    this.inventarioSvc.getArticulos({
+      buscar: this.busqueda,
+      tipo_producto: this.tipoProducto || undefined,
+      limit: 500,
+    }).subscribe({
       next: (res: any) => {
         // El backend retorna { articulos: [...], total: N, page: N, limit: N }
         const data = res?.articulos ?? (Array.isArray(res) ? res : []);
         this.dataSource.data = data;
-        setTimeout(() => {
-          this.dataSource.paginator = this.paginator;
-          this.dataSource.sort = this.sort;
-        });
+        // El @if(loading) recrea la tabla al pasar a false; los setters de ViewChild
+        // de arriba reconectan sort/paginator apenas el nodo nuevo exista.
         this.loading = false;
       },
       error: (err) => {
@@ -82,6 +109,16 @@ export class ArticulosListComponent implements OnInit {
 
   onBuscar() {
     this.cargarArticulos();
+  }
+
+  onFiltroTipoChange() {
+    this.cargarArticulos();
+  }
+
+  getTipoChip(row: any): { label: string; clase: string } {
+    return row.tipo_producto === 'kit'
+      ? { label: 'Kit', clase: 'chip-kit' }
+      : { label: 'Producto', clase: 'chip-producto' };
   }
 
   onBuscarInput(event: Event) {

@@ -114,6 +114,32 @@
 /* ── Catálogo card ───────────────────────────────────────────────────────── */
 .catalogo-card { border-top: 3px solid #1a237e !important; }
 
+.table-row.clickable { cursor: pointer; }
+
+/* ── Agregar artículo al catálogo ────────────────────────────────────────── */
+.agregar-articulo-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.agregar-buscador { flex: 2; min-width: 260px; }
+.agregar-precio { flex: 1; min-width: 140px; }
+.agregar-articulo-row button[mat-raised-button] { margin-top: 4px; }
+
+/* ── Edición de precio inline ────────────────────────────────────────────── */
+.precio-edit-row { display: flex; align-items: center; gap: 4px; }
+.precio-edit-input {
+  width: 90px;
+  padding: 4px 8px;
+  border: 1px solid #c5cae9;
+  border-radius: 6px;
+  font-size: 0.88rem;
+}
+
+.empty-state.small { padding: 1.5rem; }
+.empty-state.small mat-icon { font-size: 36px; width: 36px; height: 36px; }
+
 /* ── Search card ─────────────────────────────────────────────────────────── */
 .search-card mat-card-content { padding-top: 16px !important; }
 .full { width: 100%; }

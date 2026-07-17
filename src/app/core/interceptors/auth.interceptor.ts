@@ -1,7 +1,21 @@
 import { HttpInterceptorFn, HttpRequest, HttpHandlerFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { catchError, switchMap, throwError } from 'rxjs';
+import { Observable, catchError, switchMap, throwError, shareReplay, finalize } from 'rxjs';
 import { AuthService } from '../services/auth.service';
+
+// Compartido entre invocaciones del interceptor: si varias requests reciben 401
+// a la vez, todas esperan el mismo refresh en curso en vez de disparar uno cada una.
+let refreshInFlight$: Observable<any> | null = null;
+
+function refreshTokenOnce(auth: AuthService): Observable<any> {
+  if (!refreshInFlight$) {
+    refreshInFlight$ = auth.refreshToken().pipe(
+      finalize(() => { refreshInFlight$ = null; }),
+      shareReplay(1),
+    );
+  }
+  return refreshInFlight$;
+}
 
 export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: HttpHandlerFn) => {
   const auth = inject(AuthService);
@@ -20,7 +34,7 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
     catchError((error: HttpErrorResponse) => {
       // Si el servidor responde 401, intentar refrescar el token una vez
       if (error.status === 401 && auth.getRefreshToken()) {
-        return auth.refreshToken().pipe(
+        return refreshTokenOnce(auth).pipe(
           switchMap(() => {
             const newToken = auth.getToken();
             const retryReq = newToken

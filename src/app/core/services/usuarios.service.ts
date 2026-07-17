@@ -1,11 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class UsuariosService {
   private http = inject(HttpClient);
-  private base = 'http://127.0.0.1:8000';
+  private base = environment.apiUrl;
 
   getUsuarios(): Observable<any> {
     return this.http.get(`${this.base}/api/auth/usuarios/`);

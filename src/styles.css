@@ -193,6 +193,9 @@ html, body {
 .chip-salida  { background: var(--warn-100)    !important; color: var(--warn-500)    !important; font-weight: 600 !important; }
 .chip-ajuste  { background: var(--accent-100)  !important; color: var(--accent-600)  !important; font-weight: 600 !important; }
 
+.chip-producto { background: var(--brand-100)  !important; color: var(--brand-800)   !important; font-weight: 600 !important; }
+.chip-kit      { background: var(--accent-100) !important; color: var(--accent-600)  !important; font-weight: 600 !important; }
+
 .chip-critico { background: var(--warn-100)    !important; color: var(--warn-500)    !important; font-weight: 700 !important; }
 .chip-alto    { background: var(--orange-100)  !important; color: var(--orange-500)  !important; font-weight: 600 !important; }
 .chip-medio   { background: #fff9c4            !important; color: #f57f17            !important; font-weight: 600 !important; }

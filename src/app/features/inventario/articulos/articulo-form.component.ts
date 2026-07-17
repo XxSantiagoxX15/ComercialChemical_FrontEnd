@@ -8,6 +8,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDividerModule } from '@angular/material/divider';
 import { InventarioService } from '../../../core/services/inventario.service';
 
 @Component({
@@ -23,6 +24,7 @@ import { InventarioService } from '../../../core/services/inventario.service';
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatDividerModule,
   ],
   templateUrl: './articulo-form.component.html',
   styleUrl: './articulo-form.component.css',
@@ -40,20 +42,48 @@ export class ArticuloFormComponent implements OnInit {
     return !!this.data?.id;
   }
 
+  clasificacionesPeligro = [
+    { value: 'no_peligroso', label: 'No peligroso' },
+    { value: 'inflamable', label: 'Inflamable' },
+    { value: 'corrosivo', label: 'Corrosivo' },
+    { value: 'toxico', label: 'Tóxico' },
+    { value: 'oxidante', label: 'Oxidante' },
+    { value: 'irritante', label: 'Irritante' },
+    { value: 'explosivo', label: 'Explosivo' },
+  ];
+
+  fichaSeguridadFile: File | null = null;
+  fichaSeguridadActualUrl: string | null = null;
+
+  tiposProducto = [
+    { value: 'producto', label: 'Producto' },
+    { value: 'kit', label: 'Kit' },
+  ];
+
   form = this.fb.group({
     codigo: ['', Validators.required],
     descripcion: ['', Validators.required],
     categoria: [''],
     unidad_medida: ['unidad', Validators.required],
+    tipo_producto: ['producto'],
     stock_minimo: [0],
     stock_maximo: [0],
     tiempo_reposicion_dias: [0],
+    clasificacion_peligro: ['no_peligroso'],
+    costo_pedido: [null as number | null],
+    costo_mantenimiento_anual: [null as number | null],
   });
 
   ngOnInit() {
     if (this.data) {
       this.form.patchValue(this.data);
+      this.fichaSeguridadActualUrl = this.data.ficha_seguridad ?? null;
     }
+  }
+
+  onFichaSeguridadSeleccionada(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.fichaSeguridadFile = input.files?.[0] ?? null;
   }
 
   guardar() {
@@ -63,7 +93,10 @@ export class ArticuloFormComponent implements OnInit {
     }
     this.saving = true;
     this.error = null;
-    const payload = this.form.getRawValue();
+    const payload: any = this.form.getRawValue();
+    if (this.fichaSeguridadFile) {
+      payload.ficha_seguridad = this.fichaSeguridadFile;
+    }
     const op = this.isEdit
       ? this.inventarioSvc.actualizarArticulo(this.data.id, payload)
       : this.inventarioSvc.crearArticulo(payload);

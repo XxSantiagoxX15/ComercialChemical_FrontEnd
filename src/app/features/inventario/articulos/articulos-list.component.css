@@ -31,6 +31,7 @@
   flex-wrap: wrap;
 }
 .search-field { flex: 1; min-width: 220px; }
+.tipo-field { width: 160px; }
 
 /* Table */
 .table-wrapper { overflow-x: auto; border-radius: 0 0 12px 12px; }

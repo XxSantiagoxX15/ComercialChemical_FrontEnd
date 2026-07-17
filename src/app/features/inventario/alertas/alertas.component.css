@@ -79,3 +79,21 @@
 .chip-alto { background-color: #ffe0b2 !important; color: #e65100 !important; }
 .chip-medio { background-color: #fff9c4 !important; color: #f57f17 !important; }
 .chip-bajo { background-color: #e8f5e9 !important; color: #2e7d32 !important; }
+
+.ignoradas-toggle {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
+}
+
+.empty-state.small {
+  padding: 1.5rem;
+  color: #9ca3af;
+}
+.empty-state.small mat-icon {
+  font-size: 36px;
+  width: 36px;
+  height: 36px;
+}

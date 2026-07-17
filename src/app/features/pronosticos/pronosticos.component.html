@@ -181,6 +181,44 @@
           </mat-card>
         }
 
+        <!-- EOQ (cantidad económica de pedido) -->
+        @if (resultados.length > 0) {
+          <mat-card class="stats-card">
+            <mat-card-header>
+              <mat-card-title>Cantidad Económica de Pedido (EOQ)</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              @if (calculandoEoq) {
+                <div class="loading-center"><mat-spinner diameter="32"></mat-spinner></div>
+              } @else if (errorEoq) {
+                <div class="no-data-msg">
+                  <mat-icon>info</mat-icon>
+                  {{ errorEoq }}
+                </div>
+              } @else if (eoq) {
+                <div class="stats-grid">
+                  <div class="stat-card">
+                    <div class="stat-value">{{ eoq.cantidad_economica_pedido | number:'1.0-0' }}</div>
+                    <div class="stat-label">Unidades por pedido (EOQ)</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-value">{{ eoq.numero_pedidos_por_anio | number:'1.1-1' }}</div>
+                    <div class="stat-label">Pedidos por año</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-value">{{ eoq.dias_entre_pedidos | number:'1.0-0' }}</div>
+                    <div class="stat-label">Días entre pedidos</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-value">{{ eoq.demanda_anual_estimada | number:'1.0-0' }}</div>
+                    <div class="stat-label">Demanda anual estimada</div>
+                  </div>
+                </div>
+              }
+            </mat-card-content>
+          </mat-card>
+        }
+
         <!-- Estado inicial -->
         @if (!calculando && resultados.length === 0 && !errorCalculo) {
           <div class="no-data-msg">
@@ -317,39 +355,57 @@
               </mat-card-header>
               <mat-card-content>
                 <div class="table-wrapper">
-                  <table mat-table [dataSource]="recomendacionesFiltradas" class="full-width">
+                  <table mat-table [dataSource]="dataSourceRecomendaciones" matSort #sortRecomendaciones="matSort" class="full-width">
                     <ng-container matColumnDef="pos">
                       <th mat-header-cell *matHeaderCellDef>#</th>
                       <td mat-cell *matCellDef="let row; let i = index">{{ i + 1 }}</td>
                     </ng-container>
                     <ng-container matColumnDef="articulo">
-                      <th mat-header-cell *matHeaderCellDef>Artículo</th>
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Artículo</th>
                       <td mat-cell *matCellDef="let row">
                         <strong>{{ row.codigo }}</strong>
                         <br><small class="text-muted">{{ row.descripcion }}</small>
                       </td>
                     </ng-container>
                     <ng-container matColumnDef="stock_actual">
-                      <th mat-header-cell *matHeaderCellDef>Stock Actual</th>
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Stock Actual</th>
                       <td mat-cell *matCellDef="let row">{{ row.stock_actual | number:'1.0-0' }}</td>
                     </ng-container>
                     <ng-container matColumnDef="demanda_proyectada">
-                      <th mat-header-cell *matHeaderCellDef>Demanda Proyectada</th>
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Demanda Proyectada</th>
                       <td mat-cell *matCellDef="let row">{{ row.demanda_proyectada | number:'1.1-1' }}</td>
                     </ng-container>
                     <ng-container matColumnDef="cantidad_recomendada">
-                      <th mat-header-cell *matHeaderCellDef>Cantidad Recomendada</th>
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Cantidad Recomendada</th>
                       <td mat-cell *matCellDef="let row">
                         <strong>{{ row.cantidad_recomendada | number:'1.0-0' }}</strong>
                       </td>
                     </ng-container>
                     <ng-container matColumnDef="prioridad">
-                      <th mat-header-cell *matHeaderCellDef>Prioridad</th>
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Prioridad</th>
                       <td mat-cell *matCellDef="let row">
                         <span class="prioridad-chip"
                               [ngClass]="getPrioridadClass(row.nivel_prioridad)">
                           {{ getPrioridadLabel(row.nivel_prioridad) }}
                         </span>
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="acciones">
+                      <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                      <td mat-cell *matCellDef="let row">
+                        @if (row.cantidad_recomendada > 0) {
+                          <button mat-stroked-button color="primary"
+                                  (click)="generarOrden(row)"
+                                  [disabled]="generandoOrdenPara === row.articulo_id"
+                                  matTooltip="Generar orden de compra con la cantidad recomendada">
+                            @if (generandoOrdenPara === row.articulo_id) {
+                              <mat-spinner diameter="16" style="display:inline-block;margin-right:6px;"></mat-spinner>
+                            } @else {
+                              <mat-icon>add_shopping_cart</mat-icon>
+                            }
+                            Generar Orden
+                          </button>
+                        }
                       </td>
                     </ng-container>
                     <tr mat-header-row *matHeaderRowDef="displayedColumnsRecomendaciones"></tr>
@@ -360,6 +416,77 @@
               </mat-card-content>
             </mat-card>
           }
+        }
+      </div>
+    </mat-tab>
+
+    <!-- ══════════════════════════════════════════════════════════
+         TAB 4 — PRODUCCIÓN (KITS PRODUCIBLES)
+    ══════════════════════════════════════════════════════════ -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">precision_manufacturing</mat-icon>
+        Producción
+      </ng-template>
+
+      <div class="tab-content">
+        @if (loadingKitsProducibles) {
+          <div class="loading-center"><mat-spinner diameter="48"></mat-spinner></div>
+        } @else if (kitsProducibles.length === 0) {
+          <div class="no-data-msg">
+            <mat-icon>precision_manufacturing</mat-icon>
+            No hay kits definidos todavía. Crea un kit con sus componentes desde la API de inventario para ver aquí cuántas unidades se pueden producir.
+          </div>
+        } @else {
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>Kits Producibles con el Stock Actual</mat-card-title>
+              <mat-card-subtitle>Cuántas unidades de cada kit se pueden armar hoy, y qué componente lo limita</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="table-wrapper">
+                <table mat-table [dataSource]="kitsProducibles" class="full-width">
+                  <ng-container matColumnDef="codigo">
+                    <th mat-header-cell *matHeaderCellDef>Kit</th>
+                    <td mat-cell *matCellDef="let row">
+                      <strong>{{ row.codigo }}</strong>
+                      <br><small class="text-muted">{{ row.descripcion }}</small>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="producible">
+                    <th mat-header-cell *matHeaderCellDef>Máx. Producible</th>
+                    <td mat-cell *matCellDef="let row">
+                      <span class="prioridad-chip" [ngClass]="row.max_producible > 0 ? 'prioridad-bajo' : 'prioridad-critico'">
+                        {{ row.max_producible | number:'1.0-0' }} unidades
+                      </span>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="componente">
+                    <th mat-header-cell *matHeaderCellDef>Componente Limitante</th>
+                    <td mat-cell *matCellDef="let row">
+                      @if (row.componente_limitante) {
+                        {{ row.componente_limitante.codigo }} — {{ row.componente_limitante.descripcion }}
+                      } @else {
+                        —
+                      }
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="detalle">
+                    <th mat-header-cell *matHeaderCellDef>Disponible / Requerido por unidad</th>
+                    <td mat-cell *matCellDef="let row">
+                      @if (row.componente_limitante) {
+                        {{ row.componente_limitante.stock_disponible | number:'1.0-2' }} / {{ row.componente_limitante.requerido_por_unidad | number:'1.0-2' }}
+                      } @else {
+                        —
+                      }
+                    </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="displayedColumnsKits"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedColumnsKits;" class="table-row"></tr>
+                </table>
+              </div>
+            </mat-card-content>
+          </mat-card>
         }
       </div>
     </mat-tab>

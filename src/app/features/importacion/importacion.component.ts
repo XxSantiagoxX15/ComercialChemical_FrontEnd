@@ -37,7 +37,7 @@ export class ImportacionComponent implements OnInit {
   private importacionSvc = inject(ImportacionService);
   private snackBar = inject(MatSnackBar);
 
-  tipoActivo: 'toma_inventario' | 'ventas_cliente' = 'toma_inventario';
+  tipoActivo: 'saldos_existencias_minimas' | 'kardex' = 'saldos_existencias_minimas';
   archivoSeleccionado: File | null = null;
   uploading = false;
   uploadResult: any = null;
@@ -81,8 +81,8 @@ export class ImportacionComponent implements OnInit {
 
     // Mapear el tipo interno al formato que espera el backend
     const tipoMap: any = {
-      'toma_inventario': 'Informe_Toma_Inventario',
-      'ventas_cliente': 'Informe_Ventas_Cliente',
+      'saldos_existencias_minimas': 'Informe_Saldos_Existencias_Minimas',
+      'kardex': 'Informe_Kardex',
     };
     const tipoBackend = tipoMap[this.tipoActivo];
 
@@ -133,7 +133,12 @@ export class ImportacionComponent implements OnInit {
   }
 
   getTipoLabel(tipo: string): string {
-    const map: any = { toma_inventario: 'Toma de Inventario', ventas_cliente: 'Ventas por Cliente' };
+    const map: any = {
+      saldos_existencias_minimas: 'Saldos vs Existencias Mínimas',
+      kardex: 'Kardex',
+      Informe_Saldos_Existencias_Minimas: 'Saldos vs Existencias Mínimas',
+      Informe_Kardex: 'Kardex',
+    };
     return map[tipo] ?? tipo;
   }
 }

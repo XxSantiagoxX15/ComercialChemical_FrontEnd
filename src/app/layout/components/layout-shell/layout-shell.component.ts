@@ -44,6 +44,7 @@ export class LayoutShellComponent {
     { label: 'Movimientos',  icon: 'swap_horiz',          route: '/inventario/movimientos',  adminOnly: false },
     { label: 'Alertas',      icon: 'notifications_active',route: '/inventario/alertas',      adminOnly: false },
     { label: 'Compras',      icon: 'shopping_cart',       route: '/compras/ordenes',         adminOnly: false },
+    { label: 'Cotizador',    icon: 'request_quote',       route: '/compras/cotizador',       adminOnly: false },
     { label: 'Pronósticos',  icon: 'trending_up',         route: '/pronosticos',             adminOnly: false },
     { label: 'Importación',  icon: 'upload_file',         route: '/importacion',             adminOnly: false },
     { label: 'Auditoría',    icon: 'manage_search',       route: '/auditoria',               adminOnly: true  },

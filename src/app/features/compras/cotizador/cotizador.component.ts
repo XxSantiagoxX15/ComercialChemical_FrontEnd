@@ -13,11 +13,13 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTableModule } from '@angular/material/table';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { ComprasService } from '../../../core/services/compras.service';
 import { InventarioService } from '../../../core/services/inventario.service';
-import { Subject } from 'rxjs';
+import { ProveedorFormComponent } from '../proveedores/proveedor-form.component';
+import { Subject, of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
-import { of } from 'rxjs';
 
 @Component({
   selector: 'app-cotizador',
@@ -28,13 +30,16 @@ import { of } from 'rxjs';
     MatFormFieldModule, MatInputModule, MatAutocompleteModule,
     MatProgressSpinnerModule, MatChipsModule, MatDividerModule,
     MatTabsModule, MatTooltipModule, MatTableModule,
+    MatDialogModule, MatSnackBarModule,
   ],
   templateUrl: './cotizador.component.html',
   styleUrl: './cotizador.component.css',
 })
 export class CotizadorComponent implements OnInit {
-  private comprasSvc   = inject(ComprasService);
+  private comprasSvc    = inject(ComprasService);
   private inventarioSvc = inject(InventarioService);
+  private dialog         = inject(MatDialog);
+  private snackBar       = inject(MatSnackBar);
 
   // ── Proveedores ───────────────────────────────────────────────────────────
   proveedores: any[]         = [];
@@ -42,6 +47,18 @@ export class CotizadorComponent implements OnInit {
   proveedorSeleccionado: any = null;
   catalogoProveedor: any[]   = [];
   loadingCatalogo            = false;
+
+  // ── Agregar artículo al catálogo del proveedor seleccionado ─────────────────
+  nuevoArticuloSearch        = '';
+  nuevoArticuloSeleccionado: any = null;
+  nuevoArticuloFiltrados: any[]  = [];
+  nuevoArticuloPrecio: number | null = null;
+  agregandoArticulo           = false;
+  private nuevoArticuloSubject = new Subject<string>();
+
+  // ── Edición de precio inline ────────────────────────────────────────────────
+  editandoPrecioId: number | null = null;
+  precioEditado: number | null = null;
 
   // ── Cotizador por artículo ────────────────────────────────────────────────
   articuloSearch             = '';
@@ -52,12 +69,13 @@ export class CotizadorComponent implements OnInit {
   private searchSubject      = new Subject<string>();
 
   // ── Columnas tablas ───────────────────────────────────────────────────────
-  colsPrecios    = ['proveedor', 'precio_unitario', 'cantidad_comprada', 'ultima_compra', 'accion'];
-  colsCatalogo   = ['codigo', 'descripcion', 'precio_unitario', 'cantidad_comprada', 'ultima_compra'];
-  colsProveedores = ['nombre', 'num_articulos', 'total_comprado', 'accion'];
+  colsPrecios     = ['proveedor', 'precio_unitario', 'fecha_actualizacion', 'accion'];
+  colsCatalogo    = ['codigo', 'descripcion', 'precio_unitario', 'fecha_actualizacion', 'accion'];
+  colsProveedores = ['nombre', 'contacto', 'num_articulos', 'accion'];
 
   ngOnInit() {
     this.cargarProveedores();
+
     this.searchSubject.pipe(
       debounceTime(300),
       distinctUntilChanged(),
@@ -66,6 +84,16 @@ export class CotizadorComponent implements OnInit {
         : of({ articulos: [] }))
     ).subscribe((res: any) => {
       this.articulosFiltrados = res?.articulos ?? (Array.isArray(res) ? res : []);
+    });
+
+    this.nuevoArticuloSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(q => q.length >= 2
+        ? this.inventarioSvc.getArticulos({ buscar: q, limit: 20 })
+        : of({ articulos: [] }))
+    ).subscribe((res: any) => {
+      this.nuevoArticuloFiltrados = res?.articulos ?? (Array.isArray(res) ? res : []);
     });
   }
 
@@ -80,16 +108,130 @@ export class CotizadorComponent implements OnInit {
     });
   }
 
+  abrirFormularioProveedor(proveedor?: any, event?: Event) {
+    event?.stopPropagation();
+    const ref = this.dialog.open(ProveedorFormComponent, {
+      width: '540px',
+      data: proveedor ?? null,
+    });
+    ref.afterClosed().subscribe(result => {
+      if (result) {
+        this.cargarProveedores();
+        this.snackBar.open(
+          proveedor ? 'Proveedor actualizado correctamente' : 'Proveedor creado correctamente',
+          'Cerrar', { duration: 3000 }
+        );
+      }
+    });
+  }
+
+  eliminarProveedor(proveedor: any, event: Event) {
+    event.stopPropagation();
+    if (!confirm(`¿Eliminar al proveedor "${proveedor.nombre}"? Se eliminará también su catálogo de precios.`)) return;
+    this.comprasSvc.eliminarProveedor(proveedor.id).subscribe({
+      next: () => {
+        if (this.proveedorSeleccionado?.id === proveedor.id) {
+          this.proveedorSeleccionado = null;
+          this.catalogoProveedor = [];
+        }
+        this.cargarProveedores();
+        this.snackBar.open('Proveedor eliminado', 'Cerrar', { duration: 3000 });
+      },
+      error: () => this.snackBar.open('No se pudo eliminar el proveedor', 'Cerrar', { duration: 3000 }),
+    });
+  }
+
   verCatalogo(proveedor: any) {
     this.proveedorSeleccionado = proveedor;
+    this.cancelarNuevoArticulo();
+    this.cargarCatalogo();
+  }
+
+  cargarCatalogo() {
+    if (!this.proveedorSeleccionado) return;
     this.loadingCatalogo = true;
     this.catalogoProveedor = [];
-    this.comprasSvc.catalogoProveedor(proveedor.nombre).subscribe({
+    this.comprasSvc.getCatalogoProveedorArticulos(this.proveedorSeleccionado.id).subscribe({
       next: (res: any) => {
         this.catalogoProveedor = res?.catalogo ?? [];
         this.loadingCatalogo = false;
       },
       error: () => { this.loadingCatalogo = false; },
+    });
+  }
+
+  onNuevoArticuloSearch(event: Event) {
+    const q = (event.target as HTMLInputElement).value;
+    this.nuevoArticuloSearch = q;
+    this.nuevoArticuloSeleccionado = null;
+    this.nuevoArticuloSubject.next(q);
+  }
+
+  seleccionarNuevoArticulo(art: any) {
+    this.nuevoArticuloSeleccionado = art;
+    this.nuevoArticuloSearch = `${art.codigo} — ${art.descripcion}`;
+  }
+
+  cancelarNuevoArticulo() {
+    this.nuevoArticuloSearch = '';
+    this.nuevoArticuloSeleccionado = null;
+    this.nuevoArticuloFiltrados = [];
+    this.nuevoArticuloPrecio = null;
+  }
+
+  agregarArticuloAlCatalogo() {
+    if (!this.proveedorSeleccionado || !this.nuevoArticuloSeleccionado || !this.nuevoArticuloPrecio) return;
+    this.agregandoArticulo = true;
+    this.comprasSvc.agregarArticuloProveedor({
+      proveedor: this.proveedorSeleccionado.id,
+      articulo: this.nuevoArticuloSeleccionado.id,
+      precio_unitario: this.nuevoArticuloPrecio,
+    }).subscribe({
+      next: () => {
+        this.agregandoArticulo = false;
+        this.cancelarNuevoArticulo();
+        this.cargarCatalogo();
+        this.cargarProveedores();
+        this.snackBar.open('Artículo agregado al catálogo', 'Cerrar', { duration: 2500 });
+      },
+      error: (err) => {
+        this.agregandoArticulo = false;
+        this.snackBar.open(err.error?.error || 'No se pudo agregar el artículo', 'Cerrar', { duration: 3000 });
+      },
+    });
+  }
+
+  iniciarEdicionPrecio(item: any) {
+    this.editandoPrecioId = item.id;
+    this.precioEditado = item.precio_unitario;
+  }
+
+  cancelarEdicionPrecio() {
+    this.editandoPrecioId = null;
+    this.precioEditado = null;
+  }
+
+  guardarPrecio(item: any) {
+    if (this.precioEditado === null || this.precioEditado <= 0) return;
+    this.comprasSvc.actualizarPrecioArticulo(item.id, this.precioEditado).subscribe({
+      next: () => {
+        this.cancelarEdicionPrecio();
+        this.cargarCatalogo();
+        this.snackBar.open('Precio actualizado', 'Cerrar', { duration: 2500 });
+      },
+      error: () => this.snackBar.open('No se pudo actualizar el precio', 'Cerrar', { duration: 3000 }),
+    });
+  }
+
+  quitarArticuloDelCatalogo(item: any) {
+    if (!confirm(`¿Quitar "${item.descripcion}" del catálogo de ${this.proveedorSeleccionado.nombre}?`)) return;
+    this.comprasSvc.quitarArticuloProveedor(item.id).subscribe({
+      next: () => {
+        this.cargarCatalogo();
+        this.cargarProveedores();
+        this.snackBar.open('Artículo quitado del catálogo', 'Cerrar', { duration: 2500 });
+      },
+      error: () => this.snackBar.open('No se pudo quitar el artículo', 'Cerrar', { duration: 3000 }),
     });
   }
 
@@ -119,7 +261,6 @@ export class CotizadorComponent implements OnInit {
   }
 
   crearOrdenDesdeProveedor(item: any, proveedor: string) {
-    // Navegar a órdenes con datos pre-llenados (se puede extender)
     alert(`Crear orden para ${item.descripcion ?? item.codigo} con ${proveedor} a $${this.formatCOP(item.precio_unitario)}/ud`);
   }
 
@@ -129,13 +270,5 @@ export class CotizadorComponent implements OnInit {
       style: 'currency', currency: 'COP',
       minimumFractionDigits: 0, maximumFractionDigits: 0,
     }).format(Math.abs(valor));
-  }
-
-  get totalCatalogo(): number {
-    return this.catalogoProveedor.reduce((s, c) => s + (c.valor_total_pagado || 0), 0);
-  }
-
-  get totalProveedores(): number {
-    return this.proveedores.reduce((s, p) => s + (p.total_comprado_abs || 0), 0);
   }
 }

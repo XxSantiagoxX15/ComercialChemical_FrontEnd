@@ -11,23 +11,23 @@
     <mat-card-content>
       <div class="tipo-buttons">
         <button mat-raised-button
-                [color]="tipoActivo === 'toma_inventario' ? 'primary' : ''"
-                (click)="tipoActivo = 'toma_inventario'; archivoSeleccionado = null; uploadResult = null">
+                [color]="tipoActivo === 'saldos_existencias_minimas' ? 'primary' : ''"
+                (click)="tipoActivo = 'saldos_existencias_minimas'; archivoSeleccionado = null; uploadResult = null">
           <mat-icon>inventory</mat-icon>
-          Toma de Inventario
+          Saldos vs Existencias Mínimas
         </button>
         <button mat-raised-button
-                [color]="tipoActivo === 'ventas_cliente' ? 'primary' : ''"
-                (click)="tipoActivo = 'ventas_cliente'; archivoSeleccionado = null; uploadResult = null">
+                [color]="tipoActivo === 'kardex' ? 'primary' : ''"
+                (click)="tipoActivo = 'kardex'; archivoSeleccionado = null; uploadResult = null">
           <mat-icon>receipt_long</mat-icon>
-          Ventas por Cliente
+          Kardex
         </button>
       </div>
       <p class="tipo-desc">
-        @if (tipoActivo === 'toma_inventario') {
-          Sube un archivo Excel o CSV con el conteo físico del inventario.
+        @if (tipoActivo === 'saldos_existencias_minimas') {
+          Sube el reporte de Saldos vs Existencias Mínimas: actualiza el stock actual y el stock mínimo de cada artículo.
         } @else {
-          Sube un archivo Excel o CSV con el historial de ventas por cliente.
+          Sube el Kardex de inventario: alimenta el historial de ventas usado por el motor de pronósticos.
         }
       </p>
     </mat-card-content>

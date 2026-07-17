@@ -1,17 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
-import { LayoutShell } from './layout-shell';
+import { LayoutShellComponent } from './layout-shell.component';
 
 describe('LayoutShell', () => {
-  let component: LayoutShell;
-  let fixture: ComponentFixture<LayoutShell>;
+  let component: LayoutShellComponent;
+  let fixture: ComponentFixture<LayoutShellComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [LayoutShell],
+      imports: [LayoutShellComponent],
+      providers: [provideRouter([])],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(LayoutShell);
+    fixture = TestBed.createComponent(LayoutShellComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

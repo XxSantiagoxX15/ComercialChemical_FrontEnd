@@ -55,8 +55,16 @@ export class MovimientosComponent implements OnInit {
   private snackBar = inject(MatSnackBar);
   private fb = inject(FormBuilder);
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+  // La tabla vive dentro de un @if(loading) que la destruye y recrea en cada carga,
+  // así que MatSort/MatPaginator son instancias nuevas cada vez. Se conectan al
+  // dataSource apenas Angular las crea, en vez de adivinar con un setTimeout.
+  @ViewChild(MatPaginator) set paginatorRef(mp: MatPaginator | undefined) {
+    if (mp) this.dataSource.paginator = mp;
+  }
+
+  @ViewChild(MatSort) set sortRef(ms: MatSort | undefined) {
+    if (ms) this.dataSource.sort = ms;
+  }
 
   displayedColumns = ['fecha', 'articulo', 'tipo', 'cantidad', 'usuario', 'observaciones'];
   dataSource = new MatTableDataSource<any>([]);
@@ -77,12 +85,31 @@ export class MovimientosComponent implements OnInit {
     cantidad: [1, [Validators.required, Validators.min(1)]],
     observaciones: [''],
     forzar: [false],
+    numero_lote: [''],
+    fecha_vencimiento: [null as Date | null],
   });
+
+  get esEntrada(): boolean {
+    return this.movForm.get('tipo_movimiento')?.value === 'entrada';
+  }
 
   articuloSeleccionado: any = null;
   private searchSubject = new Subject<string>();
 
   ngOnInit() {
+    // 'fecha' (columna) en realidad vive en row.fecha_movimiento, y 'cantidad' llega
+    // como texto desde el backend (DecimalField) — sin esto MatSort no ordena ninguna
+    // de las dos correctamente (fecha no ordena nada, cantidad ordena alfabéticamente).
+    this.dataSource.sortingDataAccessor = (item: any, property: string) => {
+      switch (property) {
+        case 'fecha':
+          return new Date(item.fecha_movimiento).getTime();
+        case 'cantidad':
+          return parseFloat(item.cantidad) || 0;
+        default:
+          return item[property];
+      }
+    };
     this.cargarMovimientos();
     // Autocomplete de artículos — backend retorna { articulos: [...] }
     this.searchSubject.pipe(
@@ -107,10 +134,8 @@ export class MovimientosComponent implements OnInit {
         // Backend retorna { movimientos: [...], total: N }
         const data = res?.movimientos ?? (Array.isArray(res) ? res : []);
         this.dataSource.data = data;
-        setTimeout(() => {
-          this.dataSource.paginator = this.paginator;
-          this.dataSource.sort = this.sort;
-        });
+        // El @if(loading) recrea la tabla al pasar a false; los setters de ViewChild
+        // de arriba reconectan sort/paginator apenas el nodo nuevo exista.
         this.loading = false;
       },
       error: () => {
@@ -138,7 +163,15 @@ export class MovimientosComponent implements OnInit {
       return;
     }
     this.saving = true;
-    this.inventarioSvc.registrarMovimiento(this.movForm.getRawValue()).subscribe({
+    const payload: any = this.movForm.getRawValue();
+    if (payload.fecha_vencimiento instanceof Date) {
+      payload.fecha_vencimiento = payload.fecha_vencimiento.toISOString().split('T')[0];
+    }
+    if (!this.esEntrada) {
+      delete payload.numero_lote;
+      delete payload.fecha_vencimiento;
+    }
+    this.inventarioSvc.registrarMovimiento(payload).subscribe({
       next: () => {
         this.saving = false;
         this.snackBar.open('Movimiento registrado correctamente', 'Cerrar', { duration: 3000 });

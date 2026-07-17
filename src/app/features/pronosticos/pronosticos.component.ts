@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -6,7 +6,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
-import { MatTableModule } from '@angular/material/table';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
@@ -29,7 +30,7 @@ Chart.register(...registerables);
     CommonModule, DecimalPipe, FormsModule,
     MatFormFieldModule, MatInputModule,
     MatButtonModule, MatIconModule, MatCardModule,
-    MatTableModule, MatProgressSpinnerModule,
+    MatTableModule, MatSortModule, MatProgressSpinnerModule,
     MatChipsModule, MatDividerModule,
     MatAutocompleteModule, MatSnackBarModule,
     MatTabsModule, MatTooltipModule,
@@ -59,9 +60,16 @@ export class PronosticosComponent implements OnInit, OnDestroy {
   resultados: any[]      = [];
   recomendaciones: any[] = [];
   recomendacionesFiltradas: any[] = [];
+  dataSourceRecomendaciones = new MatTableDataSource<any>([]);
   masVendidos: any[]     = [];
   analisis: any          = null;
   errorCalculo: string | null = null;
+
+  // La tabla vive dentro de un @if condicional — se conecta el MatSort al
+  // dataSource apenas Angular crea el nodo, en vez de adivinar con un setTimeout.
+  @ViewChild('sortRecomendaciones') set sortRecomendacionesRef(ms: MatSort | undefined) {
+    if (ms) this.dataSourceRecomendaciones.sort = ms;
+  }
 
   // ── Gráficas ──────────────────────────────────────────────────────────
   private chartForecast: Chart | null = null;
@@ -71,9 +79,33 @@ export class PronosticosComponent implements OnInit, OnDestroy {
   // ── Columnas tablas ───────────────────────────────────────────────────
   displayedColumnsResultados      = ['fecha', 'demanda_proyectada', 'barra'];
   displayedColumnsMasVendidos     = ['pos', 'codigo', 'descripcion', 'total_vendido'];
-  displayedColumnsRecomendaciones = ['pos', 'articulo', 'stock_actual', 'demanda_proyectada', 'cantidad_recomendada', 'prioridad'];
+  displayedColumnsRecomendaciones = ['pos', 'articulo', 'stock_actual', 'demanda_proyectada', 'cantidad_recomendada', 'prioridad', 'acciones'];
+
+  // ── EOQ ───────────────────────────────────────────────────────────────
+  eoq: any = null;
+  calculandoEoq = false;
+  errorEoq: string | null = null;
+  generandoOrdenPara: number | null = null;
+
+  // ── Producción (kits producibles) ───────────────────────────────────────
+  kitsProducibles: any[] = [];
+  loadingKitsProducibles = false;
+  displayedColumnsKits = ['codigo', 'producible', 'componente', 'detalle'];
 
   ngOnInit() {
+    // 'prioridad' es texto (critico/alto/medio/bajo) — sin esto ordenaría
+    // alfabéticamente en vez de por urgencia real.
+    const ordenPrioridad: any = { critico: 0, alto: 1, medio: 2, bajo: 3 };
+    this.dataSourceRecomendaciones.sortingDataAccessor = (item: any, property: string) => {
+      switch (property) {
+        case 'articulo':
+          return item.codigo ?? '';
+        case 'prioridad':
+          return ordenPrioridad[item.nivel_prioridad] ?? 99;
+        default:
+          return item[property];
+      }
+    };
     this.cargarTodo();
     this.searchSubject.pipe(
       debounceTime(300),
@@ -105,6 +137,19 @@ export class PronosticosComponent implements OnInit, OnDestroy {
   cargarTodo() {
     this.cargarMasVendidos();
     this.cargarRecomendaciones();
+    this.cargarKitsProducibles();
+  }
+
+  // ── Producción (kits producibles) ───────────────────────────────────────
+  cargarKitsProducibles() {
+    this.loadingKitsProducibles = true;
+    this.inventarioSvc.getKitsProducibles().subscribe({
+      next: (res: any) => {
+        this.kitsProducibles = res?.kits ?? (Array.isArray(res) ? res : []);
+        this.loadingKitsProducibles = false;
+      },
+      error: () => { this.loadingKitsProducibles = false; },
+    });
   }
 
   // ── Búsqueda artículo ─────────────────────────────────────────────────
@@ -130,6 +175,8 @@ export class PronosticosComponent implements OnInit, OnDestroy {
     this.resultados   = [];
     this.analisis     = null;
     this.errorCalculo = null;
+    this.eoq          = null;
+    this.errorEoq      = null;
     this.destroyChart('forecast');
 
     // Análisis estadístico en paralelo
@@ -143,6 +190,7 @@ export class PronosticosComponent implements OnInit, OnDestroy {
         this.resultados = Array.isArray(res) ? res : (res.predicciones ?? []);
         this.calculando = false;
         setTimeout(() => this.renderForecastChart(), 100);
+        this.calcularEoq(id);
       },
       error: (err) => {
         this.calculando = false;
@@ -150,6 +198,39 @@ export class PronosticosComponent implements OnInit, OnDestroy {
         this.errorCalculo = e?.error
           ? `${e.error}${e.periodos_disponibles !== undefined ? ` (disponibles: ${e.periodos_disponibles})` : ''}`
           : (err.error?.detail || 'Error al calcular el pronóstico.');
+      },
+    });
+  }
+
+  // ── EOQ (cantidad económica de pedido) ─────────────────────────────────
+  calcularEoq(articuloId: number) {
+    this.calculandoEoq = true;
+    this.eoq = null;
+    this.errorEoq = null;
+    this.pronosticosSvc.getEOQ(articuloId).subscribe({
+      next: (res: any) => {
+        this.eoq = res;
+        this.calculandoEoq = false;
+      },
+      error: (err) => {
+        this.calculandoEoq = false;
+        this.errorEoq = err.error?.error || 'No se pudo calcular el EOQ para este artículo.';
+      },
+    });
+  }
+
+  // ── Generar orden de compra desde una recomendación ────────────────────
+  generarOrden(row: any) {
+    this.generandoOrdenPara = row.articulo_id;
+    this.pronosticosSvc.generarOrdenDesdeRecomendacion(row.articulo_id).subscribe({
+      next: (orden: any) => {
+        this.generandoOrdenPara = null;
+        this.snackBar.open(`Orden ${orden.numero_orden} creada correctamente`, 'Cerrar', { duration: 4000 });
+      },
+      error: (err) => {
+        this.generandoOrdenPara = null;
+        const msg = err.error?.error || err.error?.detail || 'Error al generar la orden de compra.';
+        this.snackBar.open(msg, 'Cerrar', { duration: 5000, panelClass: 'snack-error' });
       },
     });
   }
@@ -189,6 +270,7 @@ export class PronosticosComponent implements OnInit, OnDestroy {
           (r.codigo ?? '').toLowerCase().includes(f) ||
           (r.descripcion ?? '').toLowerCase().includes(f))
       : [...this.recomendaciones];
+    this.dataSourceRecomendaciones.data = this.recomendacionesFiltradas;
     // Solo re-renderizar si el canvas ya existe en el DOM (tab visible)
     const canvas = document.getElementById('chartRecomendaciones');
     if (canvas) setTimeout(() => this.renderRecomendacionesChart(), 50);
@@ -199,6 +281,8 @@ export class PronosticosComponent implements OnInit, OnDestroy {
     this.resultados           = [];
     this.analisis             = null;
     this.errorCalculo         = null;
+    this.eoq                  = null;
+    this.errorEoq             = null;
     this.articuloSeleccionado = null;
     this.articuloSearch       = '';
     this.filtroCodigo         = '';
@@ -264,8 +348,9 @@ export class PronosticosComponent implements OnInit, OnDestroy {
     const canvas = document.getElementById('chartMasVendidos') as HTMLCanvasElement;
     if (!canvas || !this.masVendidos.length) return;
 
-    const top10  = this.masVendidos.slice(0, 10);
-    const labels = top10.map((r: any) => r.articulo__codigo ?? r.codigo ?? '');
+    const top10 = this.masVendidos.slice(0, 10);
+    const nombresCompletos = top10.map((r: any) => r.articulo__descripcion ?? r.descripcion ?? r.articulo__codigo ?? r.codigo ?? '');
+    const labels = nombresCompletos.map((n: string) => n.length > 30 ? n.slice(0, 30) + '…' : n);
     const datos  = top10.map((r: any) => r.total_vendido ?? 0);
     const colors = ['#1a237e','#283593','#303f9f','#3949ab','#3f51b5',
                     '#5c6bc0','#7986cb','#9fa8da','#c5cae9','#e8eaf6'];
@@ -287,6 +372,11 @@ export class PronosticosComponent implements OnInit, OnDestroy {
         plugins: {
           legend: { display: false },
           title: { display: true, text: 'Top 10 Artículos Más Vendidos', font: { size: 14, weight: 'bold' } },
+          tooltip: {
+            callbacks: {
+              title: (items: any) => nombresCompletos[items[0].dataIndex] ?? '',
+            },
+          },
         },
         scales: { x: { beginAtZero: true } },
       },

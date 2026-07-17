@@ -98,19 +98,44 @@
       </mat-card>
     </div>
 
-    <!-- Gráfica stock crítico -->
-    @if (stockCritico.length > 0) {
+    <!-- Línea de tiempo: demanda histórica vs. proyectada -->
+    @if (puedeVerInventario && resumenHistorico?.historico?.length > 0) {
+      <mat-card class="chart-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon style="color:#1a237e;vertical-align:middle;margin-right:6px">show_chart</mat-icon>
+            Demanda Histórica vs. Proyectada
+          </mat-card-title>
+          <mat-card-subtitle>
+            Suma mensual de todos los artículos — línea sólida: histórico, línea punteada: pronóstico
+            @if (!resumenHistorico.tiene_pronostico) {
+              <span class="hint-warn"> · Aún no hay pronósticos calculados; ve a "Pronósticos" y calcula por artículo para proyectar el futuro.</span>
+            }
+          </mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chart-wrap">
+            <canvas id="chartTimeline" #timelineCanvas></canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Gráfica: stock total mensual (reconstruido del Kardex) vs. mínimo total -->
+    @if (puedeVerInventario && resumenStockMensual?.stock_mensual?.length > 0) {
       <mat-card class="chart-card">
         <mat-card-header>
           <mat-card-title>
             <mat-icon style="color:#c62828;vertical-align:middle;margin-right:6px">bar_chart</mat-icon>
-            Stock Actual vs. Mínimo
+            Stock Total vs. Mínimo Requerido
           </mat-card-title>
-          <mat-card-subtitle>Artículos con stock crítico — línea verde = mínimo requerido</mat-card-subtitle>
+          <mat-card-subtitle>
+            Suma mensual del inventario real de todos los artículos — línea verde: mínimo total configurado hoy
+          </mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
           <div class="chart-wrap">
-            <canvas id="chartStockCritico"></canvas>
+            <canvas id="chartStockCritico" #stockCanvas></canvas>
           </div>
         </mat-card-content>
       </mat-card>
@@ -155,5 +180,85 @@
         }
       </mat-card-content>
     </mat-card>
+
+    <!-- Widgets: Kits Producibles + Recomendaciones de Compra -->
+    <div class="widgets-grid">
+
+      @if (puedeVerInventario) {
+        <mat-card class="widget-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar color="primary">precision_manufacturing</mat-icon>
+            <mat-card-title>Kits Producibles</mat-card-title>
+            <mat-card-subtitle>{{ kitsListos }} de {{ kitsProducibles.length }} kits listos para producir</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            @if (kitsProducibles.length === 0) {
+              <div class="empty-state small">
+                <mat-icon>inventory_2</mat-icon>
+                <p>No hay kits configurados todavía</p>
+              </div>
+            } @else {
+              <div class="widget-list">
+                @for (kit of kitsProducibles.slice(0, 6); track kit.kit_id) {
+                  <div class="widget-item">
+                    <div class="widget-item-info">
+                      <span class="widget-item-code">{{ kit.codigo }}</span>
+                      <span class="widget-item-desc">{{ kit.descripcion }}</span>
+                    </div>
+                    <mat-chip [class]="kit.max_producible > 0 ? 'chip-bajo' : 'chip-critico'">
+                      {{ kit.max_producible }} uds
+                    </mat-chip>
+                  </div>
+                }
+              </div>
+            }
+          </mat-card-content>
+          <mat-card-actions>
+            <a mat-button color="primary" routerLink="/pronosticos">Ver módulo de producción →</a>
+          </mat-card-actions>
+        </mat-card>
+      }
+
+      @if (puedeVerCompras) {
+        <mat-card class="widget-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar color="primary">insights</mat-icon>
+            <mat-card-title>Recomendaciones de Compra</mat-card-title>
+            <mat-card-subtitle>{{ recomendacionesUrgentes.length }} artículos con prioridad crítica o alta</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            @if (recomendacionesUrgentes.length === 0) {
+              <div class="empty-state small">
+                <mat-icon>check_circle</mat-icon>
+                <p>Ningún artículo requiere reposición urgente</p>
+              </div>
+            } @else {
+              <div class="widget-list">
+                @for (rec of recomendacionesUrgentes.slice(0, 6); track rec.articulo_id) {
+                  <div class="widget-item">
+                    <div class="widget-item-info">
+                      <span class="widget-item-code">{{ rec.codigo }}</span>
+                      <span class="widget-item-desc">{{ rec.descripcion }}</span>
+                    </div>
+                    <div class="widget-item-actions">
+                      <mat-chip [class]="getPrioridadClass(rec.nivel_prioridad)">{{ rec.nivel_prioridad }}</mat-chip>
+                      <button mat-icon-button color="primary" matTooltip="Generar orden de compra"
+                              [disabled]="rec.cantidad_recomendada <= 0"
+                              (click)="generarOrden(rec)">
+                        <mat-icon>add_shopping_cart</mat-icon>
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </mat-card-content>
+          <mat-card-actions>
+            <a mat-button color="primary" routerLink="/pronosticos">Ver todas las recomendaciones →</a>
+          </mat-card-actions>
+        </mat-card>
+      }
+
+    </div>
   }
 </div>

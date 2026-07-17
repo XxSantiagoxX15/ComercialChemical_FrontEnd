@@ -40,6 +40,11 @@ export const routes: Routes = [
           import('./features/compras/ordenes/ordenes.component').then(m => m.OrdenesComponent),
       },
       {
+        path: 'compras/cotizador',
+        loadComponent: () =>
+          import('./features/compras/cotizador/cotizador.component').then(m => m.CotizadorComponent),
+      },
+      {
         path: 'pronosticos',
         loadComponent: () =>
           import('./features/pronosticos/pronosticos.component').then(m => m.PronosticosComponent),
@@ -47,18 +52,21 @@ export const routes: Routes = [
       {
         path: 'importacion',
         canActivate: [adminGuard],
+        data: { preload: false },
         loadComponent: () =>
           import('./features/importacion/importacion.component').then(m => m.ImportacionComponent),
       },
       {
         path: 'usuarios',
         canActivate: [adminGuard],
+        data: { preload: false },
         loadComponent: () =>
           import('./features/usuarios/usuarios.component').then(m => m.UsuariosComponent),
       },
       {
         path: 'auditoria',
         canActivate: [adminGuard],
+        data: { preload: false },
         loadComponent: () =>
           import('./features/auditoria/auditoria.component').then(m => m.AuditoriaComponent),
       },

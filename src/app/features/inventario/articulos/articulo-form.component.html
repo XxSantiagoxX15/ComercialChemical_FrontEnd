@@ -45,10 +45,22 @@
       }
     </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full">
-      <mat-label>Categoría</mat-label>
-      <input matInput formControlName="categoria" placeholder="Ej: Químicos, Reactivos...">
-    </mat-form-field>
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="half">
+        <mat-label>Categoría</mat-label>
+        <input matInput formControlName="categoria" placeholder="Ej: Químicos, Reactivos...">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="half">
+        <mat-label>Tipo</mat-label>
+        <mat-select formControlName="tipo_producto">
+          @for (opt of tiposProducto; track opt.value) {
+            <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+          }
+        </mat-select>
+        <mat-hint>Un kit se arma a partir de otros artículos del catálogo</mat-hint>
+      </mat-form-field>
+    </div>
 
     <div class="form-row">
       <mat-form-field appearance="outline" class="third">
@@ -64,6 +76,44 @@
       <mat-form-field appearance="outline" class="third">
         <mat-label>Tiempo Reposición (días)</mat-label>
         <input matInput type="number" formControlName="tiempo_reposicion_dias" min="0">
+      </mat-form-field>
+    </div>
+
+    <mat-divider style="margin: 12px 0;"></mat-divider>
+    <h3 class="form-section-title">Seguridad y costos</h3>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="half">
+        <mat-label>Clasificación de Peligro</mat-label>
+        <mat-select formControlName="clasificacion_peligro">
+          @for (opt of clasificacionesPeligro; track opt.value) {
+            <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <div class="half ficha-seguridad-field">
+        <label class="ficha-seguridad-label">Ficha de Seguridad (SDS/MSDS)</label>
+        <input type="file" accept="application/pdf" (change)="onFichaSeguridadSeleccionada($event)">
+        @if (fichaSeguridadFile) {
+          <span class="ficha-seguridad-hint">{{ fichaSeguridadFile.name }}</span>
+        } @else if (fichaSeguridadActualUrl) {
+          <a [href]="fichaSeguridadActualUrl" target="_blank" class="ficha-seguridad-hint">Ver ficha actual</a>
+        }
+      </div>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="half">
+        <mat-label>Costo de Pedido (S)</mat-label>
+        <input matInput type="number" formControlName="costo_pedido" min="0">
+        <mat-hint>Costo fijo de realizar un pedido, para calcular EOQ</mat-hint>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="half">
+        <mat-label>Costo de Mantenimiento Anual (H)</mat-label>
+        <input matInput type="number" formControlName="costo_mantenimiento_anual" min="0">
+        <mat-hint>Costo anual de mantener 1 unidad en inventario</mat-hint>
       </mat-form-field>
     </div>
   </form>

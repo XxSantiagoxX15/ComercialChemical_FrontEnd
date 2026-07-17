@@ -1,14 +1,17 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { DataService } from './data.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
-  private apiUrl = 'http://127.0.0.1:8000';
+  private apiUrl = environment.apiUrl;
+  private dataService = inject(DataService);
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -28,13 +31,18 @@ export class AuthService {
       const user = { ...res.user };
       // El backend retorna user.rol como ID, pero el JWT tiene el nombre en claim 'rol'
       // Extraemos el nombre del rol del JWT
-      if (res.access_token) {
-        try {
-          const payload = JSON.parse(atob(res.access_token.split('.')[1]));
-          if (payload.rol) user.rol = payload.rol;
-        } catch { /* mantener el valor original */ }
-      }
+      const payload = res.access_token ? this.decodeToken(res.access_token) : null;
+      if (payload?.rol) user.rol = payload.rol;
       localStorage.setItem('user', JSON.stringify(user));
+    }
+  }
+
+  /** Decodifica el payload de un JWT sin verificar la firma (solo lectura de claims). */
+  decodeToken(token: string): any | null {
+    try {
+      return JSON.parse(atob(token.split('.')[1]));
+    } catch {
+      return null;
     }
   }
 
@@ -60,24 +68,18 @@ export class AuthService {
 
   /** Comprueba si un JWT está expirado leyendo el claim exp */
   isTokenExpired(token: string): boolean {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.exp * 1000 < Date.now();
-    } catch {
-      return true;
-    }
+    const payload = this.decodeToken(token);
+    if (!payload) return true;
+    return payload.exp * 1000 < Date.now();
   }
 
   /** Tiempo en ms hasta que expira el access token */
   getTokenExpiresIn(): number {
     const token = this.getToken();
     if (!token) return 0;
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return Math.max(0, payload.exp * 1000 - Date.now());
-    } catch {
-      return 0;
-    }
+    const payload = this.decodeToken(token);
+    if (!payload) return 0;
+    return Math.max(0, payload.exp * 1000 - Date.now());
   }
 
   /** Llama al endpoint de refresh y actualiza el token */
@@ -94,6 +96,7 @@ export class AuthService {
     localStorage.removeItem('token');
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('user');
+    this.dataService.clearCache();
     this.router.navigate(['/login']);
   }
 }

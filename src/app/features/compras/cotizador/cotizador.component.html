@@ -4,8 +4,8 @@
       <mat-icon>request_quote</mat-icon>
       Cotizador de Compras
     </h1>
-    <button mat-stroked-button (click)="cargarProveedores()">
-      <mat-icon>refresh</mat-icon> Actualizar
+    <button mat-raised-button color="primary" (click)="abrirFormularioProveedor()">
+      <mat-icon>add</mat-icon> Nuevo Proveedor
     </button>
   </div>
 
@@ -24,65 +24,74 @@
         } @else if (proveedores.length === 0) {
           <div class="empty-state">
             <mat-icon>store_mall_directory</mat-icon>
-            <p>No se detectaron proveedores. Importa el archivo de Ventas por Cliente primero.</p>
+            <p>Aún no hay proveedores registrados.</p>
+            <button mat-raised-button color="primary" (click)="abrirFormularioProveedor()">
+              <mat-icon>add</mat-icon> Registrar el primero
+            </button>
           </div>
         } @else {
           <!-- Resumen -->
           <div class="summary-grid">
             <div class="summary-card">
               <div class="summary-value">{{ proveedores.length }}</div>
-              <div class="summary-label">Proveedores detectados</div>
-            </div>
-            <div class="summary-card accent">
-              <div class="summary-value">
-                {{ formatCOP(totalProveedores) }}
-              </div>
-              <div class="summary-label">Total histórico comprado</div>
+              <div class="summary-label">Proveedores registrados</div>
             </div>
           </div>
 
           <!-- Tabla proveedores -->
           <mat-card>
             <mat-card-content>
-              <table mat-table [dataSource]="proveedores" class="full-width">
+              <div class="table-wrapper">
+                <table mat-table [dataSource]="proveedores" class="full-width">
 
-                <ng-container matColumnDef="nombre">
-                  <th mat-header-cell *matHeaderCellDef>Proveedor</th>
-                  <td mat-cell *matCellDef="let row">
-                    <strong>{{ row.nombre }}</strong>
-                    @if (row.codigo) {
-                      <br><small class="text-muted">NIT: {{ row.codigo }}</small>
-                    }
-                  </td>
-                </ng-container>
+                  <ng-container matColumnDef="nombre">
+                    <th mat-header-cell *matHeaderCellDef>Proveedor</th>
+                    <td mat-cell *matCellDef="let row">
+                      <strong>{{ row.nombre }}</strong>
+                      @if (row.nit) {
+                        <br><small class="text-muted">NIT: {{ row.nit }}</small>
+                      }
+                    </td>
+                  </ng-container>
 
-                <ng-container matColumnDef="num_articulos">
-                  <th mat-header-cell *matHeaderCellDef>Artículos</th>
-                  <td mat-cell *matCellDef="let row">
-                    <span class="badge-blue">{{ row.num_articulos }}</span>
-                  </td>
-                </ng-container>
+                  <ng-container matColumnDef="contacto">
+                    <th mat-header-cell *matHeaderCellDef>Contacto</th>
+                    <td mat-cell *matCellDef="let row">
+                      {{ row.contacto || '—' }}
+                      @if (row.telefono || row.email) {
+                        <br><small class="text-muted">{{ row.telefono }} {{ row.telefono && row.email ? '·' : '' }} {{ row.email }}</small>
+                      }
+                    </td>
+                  </ng-container>
 
-                <ng-container matColumnDef="total_comprado">
-                  <th mat-header-cell *matHeaderCellDef>Total Comprado</th>
-                  <td mat-cell *matCellDef="let row">
-                    <span class="valor-compra">{{ formatCOP(row.total_comprado_abs) }}</span>
-                  </td>
-                </ng-container>
+                  <ng-container matColumnDef="num_articulos">
+                    <th mat-header-cell *matHeaderCellDef>Artículos</th>
+                    <td mat-cell *matCellDef="let row">
+                      <span class="badge-blue">{{ row.num_articulos }}</span>
+                    </td>
+                  </ng-container>
 
-                <ng-container matColumnDef="accion">
-                  <th mat-header-cell *matHeaderCellDef>Catálogo</th>
-                  <td mat-cell *matCellDef="let row">
-                    <button mat-stroked-button color="primary" (click)="verCatalogo(row)">
-                      <mat-icon>list_alt</mat-icon>
-                      Ver artículos
-                    </button>
-                  </td>
-                </ng-container>
+                  <ng-container matColumnDef="accion">
+                    <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                    <td mat-cell *matCellDef="let row">
+                      <button mat-stroked-button color="primary" (click)="verCatalogo(row)">
+                        <mat-icon>list_alt</mat-icon>
+                        Catálogo
+                      </button>
+                      <button mat-icon-button matTooltip="Editar" (click)="abrirFormularioProveedor(row, $event)">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button mat-icon-button color="warn" matTooltip="Eliminar" (click)="eliminarProveedor(row, $event)">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
 
-                <tr mat-header-row *matHeaderRowDef="colsProveedores"></tr>
-                <tr mat-row *matRowDef="let row; columns: colsProveedores;" class="table-row"></tr>
-              </table>
+                  <tr mat-header-row *matHeaderRowDef="colsProveedores"></tr>
+                  <tr mat-row *matRowDef="let row; columns: colsProveedores;"
+                      class="table-row clickable" (click)="verCatalogo(row)"></tr>
+                </table>
+              </div>
             </mat-card-content>
           </mat-card>
 
@@ -92,14 +101,55 @@
               <mat-card-header>
                 <mat-icon mat-card-avatar>store</mat-icon>
                 <mat-card-title>{{ proveedorSeleccionado.nombre }}</mat-card-title>
-                <mat-card-subtitle>
-                  {{ catalogoProveedor.length }} artículos ·
-                  Total histórico: {{ formatCOP(totalCatalogo) }}
-                </mat-card-subtitle>
+                <mat-card-subtitle>{{ catalogoProveedor.length }} artículos en catálogo</mat-card-subtitle>
               </mat-card-header>
               <mat-card-content>
+
+                <!-- Agregar artículo -->
+                <div class="agregar-articulo-row">
+                  <mat-form-field appearance="outline" class="agregar-buscador">
+                    <mat-label>Buscar artículo para agregar</mat-label>
+                    <mat-icon matPrefix style="margin-right:8px;color:#3949ab">search</mat-icon>
+                    <input matInput [value]="nuevoArticuloSearch"
+                           (input)="onNuevoArticuloSearch($event)"
+                           [matAutocomplete]="autoNuevoArt"
+                           placeholder="Código o descripción...">
+                    <mat-autocomplete #autoNuevoArt="matAutocomplete">
+                      @for (art of nuevoArticuloFiltrados; track art.id) {
+                        <mat-option [value]="art.codigo + ' — ' + art.descripcion"
+                                    (click)="seleccionarNuevoArticulo(art)">
+                          <strong>{{ art.codigo }}</strong> — {{ art.descripcion }}
+                        </mat-option>
+                      }
+                    </mat-autocomplete>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="agregar-precio">
+                    <mat-label>Precio unitario</mat-label>
+                    <input matInput type="number" min="0" [(ngModel)]="nuevoArticuloPrecio">
+                  </mat-form-field>
+
+                  <button mat-raised-button color="primary"
+                          [disabled]="!nuevoArticuloSeleccionado || !nuevoArticuloPrecio || agregandoArticulo"
+                          (click)="agregarArticuloAlCatalogo()">
+                    @if (agregandoArticulo) {
+                      <mat-spinner diameter="18" style="display:inline-block;margin-right:6px;"></mat-spinner>
+                    } @else {
+                      <mat-icon>add</mat-icon>
+                    }
+                    Agregar
+                  </button>
+                </div>
+
+                <mat-divider style="margin: 16px 0;"></mat-divider>
+
                 @if (loadingCatalogo) {
                   <div class="loading-center"><mat-spinner diameter="36"></mat-spinner></div>
+                } @else if (catalogoProveedor.length === 0) {
+                  <div class="empty-state small">
+                    <mat-icon>inventory_2</mat-icon>
+                    <p>Este proveedor todavía no tiene artículos en su catálogo.</p>
+                  </div>
                 } @else {
                   <div class="table-wrapper">
                     <table mat-table [dataSource]="catalogoProveedor" class="full-width">
@@ -117,22 +167,39 @@
                       <ng-container matColumnDef="precio_unitario">
                         <th mat-header-cell *matHeaderCellDef>Precio Unitario</th>
                         <td mat-cell *matCellDef="let row">
-                          @if (row.precio_unitario) {
+                          @if (editandoPrecioId === row.id) {
+                            <div class="precio-edit-row">
+                              <input type="number" min="0" class="precio-edit-input" [(ngModel)]="precioEditado">
+                              <button mat-icon-button color="primary" matTooltip="Guardar" (click)="guardarPrecio(row)">
+                                <mat-icon>check</mat-icon>
+                              </button>
+                              <button mat-icon-button matTooltip="Cancelar" (click)="cancelarEdicionPrecio()">
+                                <mat-icon>close</mat-icon>
+                              </button>
+                            </div>
+                          } @else {
                             <span class="precio-tag">{{ formatCOP(row.precio_unitario) }}</span>
-                          } @else { — }
+                          }
                         </td>
                       </ng-container>
 
-                      <ng-container matColumnDef="cantidad_comprada">
-                        <th mat-header-cell *matHeaderCellDef>Cant. Comprada</th>
+                      <ng-container matColumnDef="fecha_actualizacion">
+                        <th mat-header-cell *matHeaderCellDef>Actualizado</th>
+                        <td mat-cell *matCellDef="let row">{{ row.fecha_actualizacion }}</td>
+                      </ng-container>
+
+                      <ng-container matColumnDef="accion">
+                        <th mat-header-cell *matHeaderCellDef></th>
                         <td mat-cell *matCellDef="let row">
-                          {{ row.cantidad_total_comprada | number:'1.0-0' }} {{ row.unidad_medida }}
+                          @if (editandoPrecioId !== row.id) {
+                            <button mat-icon-button matTooltip="Editar precio" (click)="iniciarEdicionPrecio(row)">
+                              <mat-icon>edit</mat-icon>
+                            </button>
+                          }
+                          <button mat-icon-button color="warn" matTooltip="Quitar del catálogo" (click)="quitarArticuloDelCatalogo(row)">
+                            <mat-icon>delete</mat-icon>
+                          </button>
                         </td>
-                      </ng-container>
-
-                      <ng-container matColumnDef="ultima_compra">
-                        <th mat-header-cell *matHeaderCellDef>Última Compra</th>
-                        <td mat-cell *matCellDef="let row">{{ row.ultima_compra || '—' }}</td>
                       </ng-container>
 
                       <tr mat-header-row *matHeaderRowDef="colsCatalogo"></tr>
@@ -199,7 +266,8 @@
           @if (cotizacion.precios_por_proveedor.length === 0) {
             <div class="empty-state">
               <mat-icon>search_off</mat-icon>
-              <p>No hay historial de compras para este artículo.</p>
+              <p>Ningún proveedor tiene este artículo en su catálogo todavía.</p>
+              <p class="text-muted">Agrégalo desde la pestaña "Proveedores".</p>
             </div>
           } @else {
             <!-- Mejor precio destacado -->
@@ -207,7 +275,7 @@
               <div class="mejor-precio-banner">
                 <mat-icon>emoji_events</mat-icon>
                 <div>
-                  <div class="mejor-label">Mejor precio histórico</div>
+                  <div class="mejor-label">Mejor precio</div>
                   <div class="mejor-valor">{{ formatCOP(cotizacion.mejor_precio.precio_unitario) }} / {{ cotizacion.articulo.unidad_medida }}</div>
                   <div class="mejor-proveedor">{{ cotizacion.mejor_precio.proveedor }}</div>
                 </div>
@@ -220,55 +288,50 @@
                 <mat-card-title>Comparativa de Precios — {{ cotizacion.total_proveedores }} proveedores</mat-card-title>
               </mat-card-header>
               <mat-card-content>
-                <table mat-table [dataSource]="cotizacion.precios_por_proveedor" class="full-width">
+                <div class="table-wrapper">
+                  <table mat-table [dataSource]="cotizacion.precios_por_proveedor" class="full-width">
 
-                  <ng-container matColumnDef="proveedor">
-                    <th mat-header-cell *matHeaderCellDef>Proveedor</th>
-                    <td mat-cell *matCellDef="let row; let i = index">
-                      <div class="proveedor-cell">
-                        @if (i === 0) {
-                          <span class="badge-mejor">★ Mejor</span>
-                        }
-                        {{ row.proveedor }}
-                      </div>
-                    </td>
-                  </ng-container>
+                    <ng-container matColumnDef="proveedor">
+                      <th mat-header-cell *matHeaderCellDef>Proveedor</th>
+                      <td mat-cell *matCellDef="let row; let i = index">
+                        <div class="proveedor-cell">
+                          @if (i === 0) {
+                            <span class="badge-mejor">★ Mejor</span>
+                          }
+                          {{ row.proveedor }}
+                        </div>
+                      </td>
+                    </ng-container>
 
-                  <ng-container matColumnDef="precio_unitario">
-                    <th mat-header-cell *matHeaderCellDef>Precio Unitario</th>
-                    <td mat-cell *matCellDef="let row; let i = index">
-                      <span [class]="i === 0 ? 'precio-mejor' : 'precio-normal'">
-                        {{ formatCOP(row.precio_unitario) }}
-                      </span>
-                    </td>
-                  </ng-container>
+                    <ng-container matColumnDef="precio_unitario">
+                      <th mat-header-cell *matHeaderCellDef>Precio Unitario</th>
+                      <td mat-cell *matCellDef="let row; let i = index">
+                        <span [class]="i === 0 ? 'precio-mejor' : 'precio-normal'">
+                          {{ formatCOP(row.precio_unitario) }}
+                        </span>
+                      </td>
+                    </ng-container>
 
-                  <ng-container matColumnDef="cantidad_comprada">
-                    <th mat-header-cell *matHeaderCellDef>Cant. Histórica</th>
-                    <td mat-cell *matCellDef="let row">
-                      {{ row.cantidad_total_comprada | number:'1.0-0' }} uds
-                    </td>
-                  </ng-container>
+                    <ng-container matColumnDef="fecha_actualizacion">
+                      <th mat-header-cell *matHeaderCellDef>Actualizado</th>
+                      <td mat-cell *matCellDef="let row">{{ row.fecha_actualizacion }}</td>
+                    </ng-container>
 
-                  <ng-container matColumnDef="ultima_compra">
-                    <th mat-header-cell *matHeaderCellDef>Última Compra</th>
-                    <td mat-cell *matCellDef="let row">{{ row.ultima_compra || '—' }}</td>
-                  </ng-container>
+                    <ng-container matColumnDef="accion">
+                      <th mat-header-cell *matHeaderCellDef></th>
+                      <td mat-cell *matCellDef="let row">
+                        <button mat-icon-button color="primary"
+                                matTooltip="Crear orden de compra"
+                                (click)="crearOrdenDesdeProveedor(cotizacion.articulo, row.proveedor)">
+                          <mat-icon>add_shopping_cart</mat-icon>
+                        </button>
+                      </td>
+                    </ng-container>
 
-                  <ng-container matColumnDef="accion">
-                    <th mat-header-cell *matHeaderCellDef></th>
-                    <td mat-cell *matCellDef="let row">
-                      <button mat-icon-button color="primary"
-                              matTooltip="Crear orden de compra"
-                              (click)="crearOrdenDesdeProveedor(cotizacion.articulo, row.proveedor)">
-                        <mat-icon>add_shopping_cart</mat-icon>
-                      </button>
-                    </td>
-                  </ng-container>
-
-                  <tr mat-header-row *matHeaderRowDef="colsPrecios"></tr>
-                  <tr mat-row *matRowDef="let row; columns: colsPrecios;" class="table-row"></tr>
-                </table>
+                    <tr mat-header-row *matHeaderRowDef="colsPrecios"></tr>
+                    <tr mat-row *matRowDef="let row; columns: colsPrecios;" class="table-row"></tr>
+                  </table>
+                </div>
               </mat-card-content>
             </mat-card>
           }
@@ -277,7 +340,7 @@
         @if (!cotizacion && !loadingCotizacion) {
           <div class="empty-state">
             <mat-icon>price_check</mat-icon>
-            <p>Busca un artículo para ver los precios históricos por proveedor</p>
+            <p>Busca un artículo para ver los precios por proveedor</p>
           </div>
         }
       </div>
