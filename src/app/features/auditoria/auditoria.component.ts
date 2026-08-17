@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
@@ -37,9 +37,18 @@ import { AuditoriaService } from '../../core/services/auditoria.service';
 })
 export class AuditoriaComponent implements OnInit {
   private auditoriaSvc = inject(AuditoriaService);
+  private cdr = inject(ChangeDetectorRef);
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+  // La tabla vive dentro de un @if(loading) que la destruye y recrea en cada carga,
+  // así que MatSort/MatPaginator son instancias nuevas cada vez. Se conectan al
+  // dataSource apenas Angular las crea, en vez de adivinar con un setTimeout.
+  @ViewChild(MatPaginator) set paginatorRef(mp: MatPaginator | undefined) {
+    if (mp) this.dataSource.paginator = mp;
+  }
+
+  @ViewChild(MatSort) set sortRef(ms: MatSort | undefined) {
+    if (ms) this.dataSource.sort = ms;
+  }
 
   displayedColumns = ['fecha', 'usuario', 'tipo_accion', 'descripcion', 'entidad', 'ip'];
   dataSource = new MatTableDataSource<any>([]);
@@ -80,15 +89,13 @@ export class AuditoriaComponent implements OnInit {
         // Backend retorna { eventos: [...], total: N }
         const data = res?.eventos ?? (Array.isArray(res) ? res : []);
         this.dataSource.data = data;
-        setTimeout(() => {
-          this.dataSource.paginator = this.paginator;
-          this.dataSource.sort = this.sort;
-        });
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.error = 'Error al cargar los eventos de auditoría.';
         this.loading = false;
+        this.cdr.detectChanges();
       },
     });
   }

@@ -32,6 +32,10 @@ export class ComprasService {
     return this.http.put(`${this.base}/api/compras/ordenes/${id}/`, { estado });
   }
 
+  descargarOrdenPdf(id: number): Observable<Blob> {
+    return this.http.get(`${this.base}/api/compras/ordenes/${id}/pdf/`, { responseType: 'blob' });
+  }
+
   getProveedores(): Observable<any> {
     return this.http.get(`${this.base}/api/compras/proveedores/`);
   }

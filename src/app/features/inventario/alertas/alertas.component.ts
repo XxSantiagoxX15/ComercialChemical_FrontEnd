@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
@@ -40,6 +40,7 @@ export class AlertasComponent implements OnInit {
   private comprasSvc = inject(ComprasService);
   private snackBar = inject(MatSnackBar);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   // La tabla vive dentro de un @if(loading) que la destruye y recrea en cada carga,
   // así que MatSort/MatPaginator son instancias nuevas cada vez. Se conectan al
@@ -91,10 +92,12 @@ export class AlertasComponent implements OnInit {
       next: (res: any) => {
         this.vencimientos = res?.alertas ?? (Array.isArray(res) ? res : []);
         this.loadingVencimientos = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.errorVencimientos = 'Error al cargar los vencimientos.';
         this.loadingVencimientos = false;
+        this.cdr.detectChanges();
       },
     });
   }
@@ -114,10 +117,12 @@ export class AlertasComponent implements OnInit {
         this.alertas = res?.alertas ?? (Array.isArray(res) ? res : []);
         this.dataSource.data = this.alertas;
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.error = 'Error al cargar las alertas.';
         this.loading = false;
+        this.cdr.detectChanges();
       },
     });
   }
@@ -130,9 +135,11 @@ export class AlertasComponent implements OnInit {
         this.snackBar.open(`Alerta de "${row.codigo}" ignorada`, 'Deshacer', { duration: 5000 })
           .onAction().subscribe(() => this.reactivarAlerta(row));
         if (this.mostrarIgnoradas) this.cargarIgnoradas();
+        this.cdr.detectChanges();
       },
       error: () => {
         this.snackBar.open('No se pudo ignorar la alerta.', 'Cerrar', { duration: 3000, panelClass: 'snack-error' });
+        this.cdr.detectChanges();
       },
     });
   }
@@ -151,8 +158,9 @@ export class AlertasComponent implements OnInit {
         const todas = res?.alertas ?? (Array.isArray(res) ? res : []);
         this.ignoradas = todas.filter((a: any) => a.alerta_ignorada);
         this.loadingIgnoradas = false;
+        this.cdr.detectChanges();
       },
-      error: () => { this.loadingIgnoradas = false; },
+      error: () => { this.loadingIgnoradas = false; this.cdr.detectChanges(); },
     });
   }
 
@@ -162,16 +170,22 @@ export class AlertasComponent implements OnInit {
         this.ignoradas = this.ignoradas.filter(a => a.articulo_id !== row.articulo_id);
         this.snackBar.open(`Alerta de "${row.codigo}" reactivada`, 'Cerrar', { duration: 3000 });
         this.cargarAlertas();
+        this.cdr.detectChanges();
       },
       error: () => {
         this.snackBar.open('No se pudo reactivar la alerta.', 'Cerrar', { duration: 3000, panelClass: 'snack-error' });
+        this.cdr.detectChanges();
       },
     });
   }
 
   getPct(articulo: any): number {
-    if (!articulo.stock_minimo || articulo.stock_minimo === 0) return 0;
-    return Math.min(100, Math.round((articulo.stock_actual / articulo.stock_minimo) * 100));
+    // stock_minimo/stock_actual llegan como texto (DecimalField): "0.000"/"0.000"
+    // da NaN en JS (no !0), no 0, y NaN no cumple ninguna comparación <= más abajo.
+    const minimo = parseFloat(articulo.stock_minimo) || 0;
+    const actual = parseFloat(articulo.stock_actual) || 0;
+    if (minimo <= 0) return 0;
+    return Math.min(100, Math.round((actual / minimo) * 100));
   }
 
   getNivel(articulo: any): string {
@@ -190,7 +204,7 @@ export class AlertasComponent implements OnInit {
   crearOrden(articulo: any) {
     const cantidad = Math.max(1, (articulo.stock_minimo ?? 10) - (articulo.stock_actual ?? 0));
     this.comprasSvc.crearOrden({
-      articulo: articulo.id,
+      articulo: articulo.articulo_id,
       cantidad_solicitada: cantidad,
       precio_unitario: 0,
       proveedor: '',
@@ -203,6 +217,7 @@ export class AlertasComponent implements OnInit {
       error: (err) => {
         const msg = err.error?.detail || 'Error al crear la orden de compra.';
         this.snackBar.open(msg, 'Cerrar', { duration: 5000, panelClass: 'snack-error' });
+        this.cdr.detectChanges();
       },
     });
   }

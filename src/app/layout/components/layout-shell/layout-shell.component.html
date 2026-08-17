@@ -1,5 +1,10 @@
 <div class="layout" (click)="showUserMenu && (showUserMenu = false)">
 
+  <!-- Fondo oscuro detrás del sidebar cuando es un overlay (tablet/celular) -->
+  @if (isMobile && isSidebarOpen) {
+    <div class="sidebar-backdrop" (click)="toggleSidebar()"></div>
+  }
+
   <!-- ══ SIDEBAR ══ -->
   <aside class="sidebar" [class.closed]="!isSidebarOpen">
 
@@ -15,7 +20,7 @@
     </div>
 
     <!-- Navigation -->
-    <nav class="nav-section">
+    <nav class="nav-section" (click)="closeSidebarIfMobile()">
 
       <div class="nav-label">Principal</div>
 

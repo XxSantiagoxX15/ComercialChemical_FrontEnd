@@ -1,9 +1,9 @@
-import { Component, inject, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormsModule } from '@angular/forms';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
-import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
-import { MatSortModule, MatSort } from '@angular/material/sort';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -54,17 +54,7 @@ export class MovimientosComponent implements OnInit {
   private inventarioSvc = inject(InventarioService);
   private snackBar = inject(MatSnackBar);
   private fb = inject(FormBuilder);
-
-  // La tabla vive dentro de un @if(loading) que la destruye y recrea en cada carga,
-  // así que MatSort/MatPaginator son instancias nuevas cada vez. Se conectan al
-  // dataSource apenas Angular las crea, en vez de adivinar con un setTimeout.
-  @ViewChild(MatPaginator) set paginatorRef(mp: MatPaginator | undefined) {
-    if (mp) this.dataSource.paginator = mp;
-  }
-
-  @ViewChild(MatSort) set sortRef(ms: MatSort | undefined) {
-    if (ms) this.dataSource.sort = ms;
-  }
+  private cdr = inject(ChangeDetectorRef);
 
   displayedColumns = ['fecha', 'articulo', 'tipo', 'cantidad', 'usuario', 'observaciones'];
   dataSource = new MatTableDataSource<any>([]);
@@ -75,6 +65,15 @@ export class MovimientosComponent implements OnInit {
   filtroTipo = '';
   filtroFechaDesde: Date | null = null;
   filtroFechaHasta: Date | null = null;
+
+  // El listado tiene decenas de miles de filas (historial de Kardex importado),
+  // así que ordenamiento y paginación se resuelven en el backend en vez de
+  // traer todo al navegador y ordenar/paginar en el cliente.
+  page = 1;
+  pageSize = 50;
+  total = 0;
+  sortActive = 'fecha_movimiento';
+  sortDirection: 'asc' | 'desc' = 'desc';
 
   articulosFiltrados: any[] = [];
   articuloSearch = '';
@@ -97,19 +96,6 @@ export class MovimientosComponent implements OnInit {
   private searchSubject = new Subject<string>();
 
   ngOnInit() {
-    // 'fecha' (columna) en realidad vive en row.fecha_movimiento, y 'cantidad' llega
-    // como texto desde el backend (DecimalField) — sin esto MatSort no ordena ninguna
-    // de las dos correctamente (fecha no ordena nada, cantidad ordena alfabéticamente).
-    this.dataSource.sortingDataAccessor = (item: any, property: string) => {
-      switch (property) {
-        case 'fecha':
-          return new Date(item.fecha_movimiento).getTime();
-        case 'cantidad':
-          return parseFloat(item.cantidad) || 0;
-        default:
-          return item[property];
-      }
-    };
     this.cargarMovimientos();
     // Autocomplete de artículos — backend retorna { articulos: [...] }
     this.searchSubject.pipe(
@@ -118,13 +104,18 @@ export class MovimientosComponent implements OnInit {
       switchMap(q => q.length >= 2 ? this.inventarioSvc.getArticulos({ buscar: q, limit: 20 }) : of({ articulos: [] }))
     ).subscribe((res: any) => {
       this.articulosFiltrados = res?.articulos ?? (Array.isArray(res) ? res : []);
+      this.cdr.detectChanges();
     });
   }
 
   cargarMovimientos() {
     this.loading = true;
     this.error = null;
-    const params: any = {};
+    const params: any = {
+      page: this.page,
+      limit: this.pageSize,
+      ordering: (this.sortDirection === 'desc' ? '-' : '') + this.sortActive,
+    };
     if (this.filtroTipo) params.tipo_movimiento = this.filtroTipo;
     if (this.filtroFechaDesde) params.fecha_desde = this.filtroFechaDesde.toISOString().split('T')[0];
     if (this.filtroFechaHasta) params.fecha_hasta = this.filtroFechaHasta.toISOString().split('T')[0];
@@ -134,15 +125,41 @@ export class MovimientosComponent implements OnInit {
         // Backend retorna { movimientos: [...], total: N }
         const data = res?.movimientos ?? (Array.isArray(res) ? res : []);
         this.dataSource.data = data;
-        // El @if(loading) recrea la tabla al pasar a false; los setters de ViewChild
-        // de arriba reconectan sort/paginator apenas el nodo nuevo exista.
+        this.total = res?.total ?? data.length;
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.error = 'Error al cargar los movimientos.';
         this.loading = false;
+        this.cdr.detectChanges();
       },
     });
+  }
+
+  aplicarFiltro() {
+    this.page = 1;
+    this.cargarMovimientos();
+  }
+
+  onSortChange(sort: Sort) {
+    if (sort.direction) {
+      this.sortActive = sort.active;
+      this.sortDirection = sort.direction as 'asc' | 'desc';
+    } else {
+      // Al quitar el orden (tercer clic) volvemos al orden por defecto
+      // en vez de quedar en un estado "sin orden" que el backend no soporta.
+      this.sortActive = 'fecha_movimiento';
+      this.sortDirection = 'desc';
+    }
+    this.page = 1;
+    this.cargarMovimientos();
+  }
+
+  onPageChange(event: PageEvent) {
+    this.page = event.pageIndex + 1;
+    this.pageSize = event.pageSize;
+    this.cargarMovimientos();
   }
 
   onArticuloSearch(event: Event) {
@@ -179,11 +196,13 @@ export class MovimientosComponent implements OnInit {
         this.articuloSeleccionado = null;
         this.articuloSearch = '';
         this.cargarMovimientos();
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.saving = false;
         const msg = err.error?.detail || err.error?.message || 'Error al registrar el movimiento.';
         this.snackBar.open(msg, 'Cerrar', { duration: 5000, panelClass: 'snack-error' });
+        this.cdr.detectChanges();
       },
     });
   }

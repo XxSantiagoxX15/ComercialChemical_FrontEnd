@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -36,6 +36,7 @@ import { ImportacionService } from '../../core/services/importacion.service';
 export class ImportacionComponent implements OnInit {
   private importacionSvc = inject(ImportacionService);
   private snackBar = inject(MatSnackBar);
+  private cdr = inject(ChangeDetectorRef);
 
   tipoActivo: 'saldos_existencias_minimas' | 'kardex' = 'saldos_existencias_minimas';
   archivoSeleccionado: File | null = null;
@@ -93,12 +94,14 @@ export class ImportacionComponent implements OnInit {
         this.archivoSeleccionado = null;
         this.cargarHistorial();
         this.snackBar.open('Archivo importado correctamente', 'Cerrar', { duration: 3000 });
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.uploading = false;
         const msg = err.error?.detail || err.error?.mensaje || 'Error al procesar el archivo.';
         this.uploadResult = { tipo: 'error', mensaje: msg };
         this.snackBar.open(msg, 'Cerrar', { duration: 5000, panelClass: 'snack-error' });
+        this.cdr.detectChanges();
       },
     });
   }
@@ -109,8 +112,9 @@ export class ImportacionComponent implements OnInit {
       next: (res: any) => {
         this.historial = Array.isArray(res) ? res : (res.results ?? []);
         this.loadingHistorial = false;
+        this.cdr.detectChanges();
       },
-      error: () => { this.loadingHistorial = false; },
+      error: () => { this.loadingHistorial = false; this.cdr.detectChanges(); },
     });
   }
 

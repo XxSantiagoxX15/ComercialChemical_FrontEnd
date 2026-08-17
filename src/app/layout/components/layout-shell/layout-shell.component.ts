@@ -1,7 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+
+const MOBILE_BREAKPOINT = 1024;
 
 @Component({
   selector: 'app-layout-shell',
@@ -14,8 +16,25 @@ export class LayoutShellComponent {
   private auth   = inject(AuthService);
   private router = inject(Router);
 
-  isSidebarOpen = true;
+  // En tablet/celular el sidebar pasa de "colapsar a iconos" (desktop) a
+  // "overlay que se desliza sobre el contenido" — por eso arranca cerrado
+  // ahí, para no tapar la pantalla completa al entrar.
+  isMobile      = window.innerWidth <= MOBILE_BREAKPOINT;
+  isSidebarOpen = !this.isMobile;
   showUserMenu  = false;
+
+  @HostListener('window:resize')
+  onResize() {
+    const eraMobile = this.isMobile;
+    this.isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
+    if (this.isMobile !== eraMobile) {
+      this.isSidebarOpen = !this.isMobile;
+    }
+  }
+
+  closeSidebarIfMobile() {
+    if (this.isMobile) this.isSidebarOpen = false;
+  }
 
   get userName(): string {
     const user = this.auth.getUser();

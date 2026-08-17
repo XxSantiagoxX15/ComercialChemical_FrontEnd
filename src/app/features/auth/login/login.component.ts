@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -16,6 +16,7 @@ export class LoginComponent {
   private fb   = inject(FormBuilder);
   private auth = inject(AuthService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   isLoading    = false;
   errorMessage: string | null = null;
@@ -46,6 +47,7 @@ export class LoginComponent {
       error: () => {
         this.isLoading    = false;
         this.errorMessage = 'Credenciales inválidas';
+        this.cdr.detectChanges();
       }
     });
   }

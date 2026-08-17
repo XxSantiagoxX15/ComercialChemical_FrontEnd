@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -30,6 +30,7 @@ export class ProveedorFormComponent {
   private comprasSvc = inject(ComprasService);
   private dialogRef = inject(MatDialogRef<ProveedorFormComponent>);
   private data = inject(MAT_DIALOG_DATA);
+  private cdr = inject(ChangeDetectorRef);
 
   saving = false;
   error: string | null = null;
@@ -72,6 +73,7 @@ export class ProveedorFormComponent {
       error: (err) => {
         this.saving = false;
         this.error = err.error?.nombre?.[0] || err.error?.detail || err.error?.message || 'Error al guardar el proveedor.';
+        this.cdr.detectChanges();
       },
     });
   }

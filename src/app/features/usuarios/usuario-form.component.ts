@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -80,6 +80,7 @@ export class UsuarioFormComponent implements OnInit {
   private fb          = inject(FormBuilder);
   private svc         = inject(UsuariosService);
   private dialogRef   = inject(MatDialogRef<UsuarioFormComponent>);
+  private cdr         = inject(ChangeDetectorRef);
   data                = inject(MAT_DIALOG_DATA);
 
   saving = false;
@@ -97,6 +98,7 @@ export class UsuarioFormComponent implements OnInit {
     // Cargar roles desde el backend
     this.svc.getRoles().subscribe((roles: any[]) => {
       this.roles = roles;
+      this.cdr.detectChanges();
     });
 
     // Si es edición, cargar los datos del usuario
@@ -134,6 +136,7 @@ export class UsuarioFormComponent implements OnInit {
         this.saving = false;
         const msg = err.error?.email?.[0] || err.error?.detail || err.error?.error || 'Error al guardar';
         this.error = msg;
+        this.cdr.detectChanges();
       },
     });
   }

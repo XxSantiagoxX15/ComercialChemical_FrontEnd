@@ -74,14 +74,14 @@
               <th mat-header-cell *matHeaderCellDef mat-sort-header>Stock Actual</th>
               <td mat-cell *matCellDef="let row">
                 <span [class.stock-low]="row.stock_actual <= row.stock_minimo">
-                  {{ row.stock_actual }} {{ row.unidad_medida }}
+                  {{ row.stock_actual | number:'1.0-3' }} {{ row.unidad_medida }}
                 </span>
               </td>
             </ng-container>
 
             <ng-container matColumnDef="stock_minimo">
               <th mat-header-cell *matHeaderCellDef mat-sort-header>Stock Mínimo</th>
-              <td mat-cell *matCellDef="let row">{{ row.stock_minimo }}</td>
+              <td mat-cell *matCellDef="let row">{{ row.stock_minimo | number:'1.0-3' }}</td>
             </ng-container>
 
             <ng-container matColumnDef="total_vendido">

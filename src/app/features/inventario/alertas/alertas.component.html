@@ -44,22 +44,34 @@
             <ng-container matColumnDef="stock_actual">
               <th mat-header-cell *matHeaderCellDef mat-sort-header>Stock Actual</th>
               <td mat-cell *matCellDef="let row">
-                <span class="stock-value">{{ row.stock_actual }}</span>
+                <span class="stock-value">{{ row.stock_actual | number:'1.0-3' }}</span>
               </td>
             </ng-container>
 
             <ng-container matColumnDef="stock_minimo">
               <th mat-header-cell *matHeaderCellDef mat-sort-header>Stock Mínimo</th>
-              <td mat-cell *matCellDef="let row">{{ row.stock_minimo }}</td>
+              <td mat-cell *matCellDef="let row">
+                @if (row.stock_minimo > 0) {
+                  {{ row.stock_minimo | number:'1.0-3' }}
+                } @else {
+                  <span class="sin-minimo" matTooltip="Este artículo no tiene un mínimo configurado; se alerta por estar en 0 o negativo">Sin definir</span>
+                }
+              </td>
             </ng-container>
 
             <ng-container matColumnDef="pct_stock">
               <th mat-header-cell *matHeaderCellDef>% Stock</th>
               <td mat-cell *matCellDef="let row">
-                <div class="pct-bar-wrap">
-                  <div class="pct-bar" [style.width.%]="getPct(row)" [class]="'pct-' + getNivel(row)"></div>
-                  <span>{{ getPct(row) }}%</span>
-                </div>
+                @if (row.stock_minimo > 0) {
+                  <div class="pct-bar-wrap">
+                    <div class="pct-bar" [style.width.%]="getPct(row)" [class]="'pct-' + getNivel(row)"></div>
+                    <span>{{ getPct(row) }}%</span>
+                  </div>
+                } @else if (row.stock_actual < 0) {
+                  <span class="sin-minimo">Stock negativo</span>
+                } @else {
+                  <span class="sin-minimo">Sin stock</span>
+                }
               </td>
             </ng-container>
 

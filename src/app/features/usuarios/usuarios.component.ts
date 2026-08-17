@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormsModule } from '@angular/forms';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
@@ -38,9 +38,18 @@ export class UsuariosComponent implements OnInit {
   private usuariosSvc = inject(UsuariosService);
   private dialog      = inject(MatDialog);
   private snackBar    = inject(MatSnackBar);
+  private cdr         = inject(ChangeDetectorRef);
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+  // La tabla vive dentro de un @if(loading) que la destruye y recrea en cada carga,
+  // así que MatSort/MatPaginator son instancias nuevas cada vez. Se conectan al
+  // dataSource apenas Angular las crea, en vez de adivinar con un setTimeout.
+  @ViewChild(MatPaginator) set paginatorRef(mp: MatPaginator | undefined) {
+    if (mp) this.dataSource.paginator = mp;
+  }
+
+  @ViewChild(MatSort) set sortRef(ms: MatSort | undefined) {
+    if (ms) this.dataSource.sort = ms;
+  }
 
   displayedColumns = ['nombre', 'email', 'rol', 'activo', 'fecha_creacion', 'acciones'];
   dataSource = new MatTableDataSource<any>([]);
@@ -60,15 +69,13 @@ export class UsuariosComponent implements OnInit {
         if (this.busqueda) {
           this.dataSource.filter = this.busqueda.trim().toLowerCase();
         }
-        setTimeout(() => {
-          this.dataSource.paginator = this.paginator;
-          this.dataSource.sort      = this.sort;
-        });
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.error   = `Error al cargar usuarios. (${err.status})`;
         this.loading = false;
+        this.cdr.detectChanges();
       },
     });
   }
@@ -91,6 +98,7 @@ export class UsuariosComponent implements OnInit {
           'Cerrar', { duration: 3000 }
         );
       }
+      this.cdr.detectChanges();
     });
   }
 
@@ -104,6 +112,7 @@ export class UsuariosComponent implements OnInit {
       if (huboCambios) {
         this.snackBar.open('Permisos de roles actualizados', 'Cerrar', { duration: 3000 });
       }
+      this.cdr.detectChanges();
     });
   }
 
@@ -115,8 +124,9 @@ export class UsuariosComponent implements OnInit {
           'Cerrar', { duration: 3000 }
         );
         this.cargarUsuarios();
+        this.cdr.detectChanges();
       },
-      error: () => this.snackBar.open('Error al cambiar estado', 'Cerrar', { duration: 3000 }),
+      error: () => { this.snackBar.open('Error al cambiar estado', 'Cerrar', { duration: 3000 }); this.cdr.detectChanges(); },
     });
   }
 
@@ -127,8 +137,8 @@ export class UsuariosComponent implements OnInit {
       return;
     }
     this.usuariosSvc.resetPassword(usuario.id, nueva).subscribe({
-      next: () => this.snackBar.open('Contraseña restablecida', 'Cerrar', { duration: 3000 }),
-      error: () => this.snackBar.open('Error al restablecer contraseña', 'Cerrar', { duration: 3000 }),
+      next: () => { this.snackBar.open('Contraseña restablecida', 'Cerrar', { duration: 3000 }); this.cdr.detectChanges(); },
+      error: () => { this.snackBar.open('Error al restablecer contraseña', 'Cerrar', { duration: 3000 }); this.cdr.detectChanges(); },
     });
   }
 

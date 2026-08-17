@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -40,6 +40,7 @@ export class CotizadorComponent implements OnInit {
   private inventarioSvc = inject(InventarioService);
   private dialog         = inject(MatDialog);
   private snackBar       = inject(MatSnackBar);
+  private cdr             = inject(ChangeDetectorRef);
 
   // ── Proveedores ───────────────────────────────────────────────────────────
   proveedores: any[]         = [];
@@ -84,6 +85,7 @@ export class CotizadorComponent implements OnInit {
         : of({ articulos: [] }))
     ).subscribe((res: any) => {
       this.articulosFiltrados = res?.articulos ?? (Array.isArray(res) ? res : []);
+      this.cdr.detectChanges();
     });
 
     this.nuevoArticuloSubject.pipe(
@@ -94,6 +96,7 @@ export class CotizadorComponent implements OnInit {
         : of({ articulos: [] }))
     ).subscribe((res: any) => {
       this.nuevoArticuloFiltrados = res?.articulos ?? (Array.isArray(res) ? res : []);
+      this.cdr.detectChanges();
     });
   }
 
@@ -103,8 +106,9 @@ export class CotizadorComponent implements OnInit {
       next: (res: any) => {
         this.proveedores = res?.proveedores ?? [];
         this.loadingProveedores = false;
+        this.cdr.detectChanges();
       },
-      error: () => { this.loadingProveedores = false; },
+      error: () => { this.loadingProveedores = false; this.cdr.detectChanges(); },
     });
   }
 
@@ -122,6 +126,7 @@ export class CotizadorComponent implements OnInit {
           'Cerrar', { duration: 3000 }
         );
       }
+      this.cdr.detectChanges();
     });
   }
 
@@ -136,8 +141,9 @@ export class CotizadorComponent implements OnInit {
         }
         this.cargarProveedores();
         this.snackBar.open('Proveedor eliminado', 'Cerrar', { duration: 3000 });
+        this.cdr.detectChanges();
       },
-      error: () => this.snackBar.open('No se pudo eliminar el proveedor', 'Cerrar', { duration: 3000 }),
+      error: () => { this.snackBar.open('No se pudo eliminar el proveedor', 'Cerrar', { duration: 3000 }); this.cdr.detectChanges(); },
     });
   }
 
@@ -155,8 +161,9 @@ export class CotizadorComponent implements OnInit {
       next: (res: any) => {
         this.catalogoProveedor = res?.catalogo ?? [];
         this.loadingCatalogo = false;
+        this.cdr.detectChanges();
       },
-      error: () => { this.loadingCatalogo = false; },
+      error: () => { this.loadingCatalogo = false; this.cdr.detectChanges(); },
     });
   }
 
@@ -193,10 +200,12 @@ export class CotizadorComponent implements OnInit {
         this.cargarCatalogo();
         this.cargarProveedores();
         this.snackBar.open('Artículo agregado al catálogo', 'Cerrar', { duration: 2500 });
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.agregandoArticulo = false;
         this.snackBar.open(err.error?.error || 'No se pudo agregar el artículo', 'Cerrar', { duration: 3000 });
+        this.cdr.detectChanges();
       },
     });
   }
@@ -218,8 +227,9 @@ export class CotizadorComponent implements OnInit {
         this.cancelarEdicionPrecio();
         this.cargarCatalogo();
         this.snackBar.open('Precio actualizado', 'Cerrar', { duration: 2500 });
+        this.cdr.detectChanges();
       },
-      error: () => this.snackBar.open('No se pudo actualizar el precio', 'Cerrar', { duration: 3000 }),
+      error: () => { this.snackBar.open('No se pudo actualizar el precio', 'Cerrar', { duration: 3000 }); this.cdr.detectChanges(); },
     });
   }
 
@@ -230,8 +240,9 @@ export class CotizadorComponent implements OnInit {
         this.cargarCatalogo();
         this.cargarProveedores();
         this.snackBar.open('Artículo quitado del catálogo', 'Cerrar', { duration: 2500 });
+        this.cdr.detectChanges();
       },
-      error: () => this.snackBar.open('No se pudo quitar el artículo', 'Cerrar', { duration: 3000 }),
+      error: () => { this.snackBar.open('No se pudo quitar el artículo', 'Cerrar', { duration: 3000 }); this.cdr.detectChanges(); },
     });
   }
 
@@ -255,8 +266,9 @@ export class CotizadorComponent implements OnInit {
       next: (res: any) => {
         this.cotizacion = res;
         this.loadingCotizacion = false;
+        this.cdr.detectChanges();
       },
-      error: () => { this.loadingCotizacion = false; },
+      error: () => { this.loadingCotizacion = false; this.cdr.detectChanges(); },
     });
   }
 

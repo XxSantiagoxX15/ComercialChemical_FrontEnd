@@ -121,21 +121,21 @@
       </mat-card>
     }
 
-    <!-- Gráfica: stock total mensual (reconstruido del Kardex) vs. mínimo total -->
-    @if (puedeVerInventario && resumenStockMensual?.stock_mensual?.length > 0) {
+    <!-- Gráfica: top 10 productos más vendidos -->
+    @if (puedeVerInventario && masVendidos.length > 0) {
       <mat-card class="chart-card">
         <mat-card-header>
           <mat-card-title>
             <mat-icon style="color:#c62828;vertical-align:middle;margin-right:6px">bar_chart</mat-icon>
-            Stock Total vs. Mínimo Requerido
+            Top 10 Productos Más Vendidos
           </mat-card-title>
           <mat-card-subtitle>
-            Suma mensual del inventario real de todos los artículos — línea verde: mínimo total configurado hoy
+            Total histórico vendido por artículo
           </mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
           <div class="chart-wrap">
-            <canvas id="chartStockCritico" #stockCanvas></canvas>
+            <canvas id="chartMasVendidosDash" #masVendidosCanvas></canvas>
           </div>
         </mat-card-content>
       </mat-card>
@@ -163,9 +163,15 @@
                   <span class="alert-desc">{{ alerta.descripcion }}</span>
                 </div>
                 <div class="alert-stock">
-                  <span class="stock-value">{{ alerta.stock_actual }} / {{ alerta.stock_minimo }}</span>
+                  <span class="stock-value">{{ alerta.stock_actual | number:'1.0-3' }} / {{ alerta.stock_minimo | number:'1.0-3' }}</span>
                   <mat-chip [class]="'chip-' + getNivelUrgencia(alerta)">
-                    {{ getPctStock(alerta) }}%
+                    @if (getPctStock(alerta) !== null) {
+                      {{ getPctStock(alerta) }}%
+                    } @else if (alerta.stock_actual < 0) {
+                      Negativo
+                    } @else {
+                      Sin stock
+                    }
                   </mat-chip>
                 </div>
               </div>
@@ -181,8 +187,46 @@
       </mat-card-content>
     </mat-card>
 
-    <!-- Widgets: Kits Producibles + Recomendaciones de Compra -->
+    <!-- Widgets: Kits Producibles + Recomendaciones de Compra + Riesgo de Agotamiento -->
     <div class="widgets-grid">
+
+      @if (puedeVerInventario && riesgoAgotamiento) {
+        <mat-card class="widget-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar color="warn">hourglass_bottom</mat-icon>
+            <mat-card-title>Riesgo de Agotamiento</mat-card-title>
+            <mat-card-subtitle>
+              {{ riesgoAgotamiento.total_en_riesgo }} de {{ riesgoAgotamiento.total_con_pronostico }} artículos con pronóstico
+              se agotan en {{ riesgoAgotamiento.dias_umbral }} días o menos
+            </mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            @if (!riesgoAgotamiento.top?.length) {
+              <div class="empty-state small">
+                <mat-icon>check_circle</mat-icon>
+                <p>Ningún artículo en riesgo de agotarse pronto</p>
+              </div>
+            } @else {
+              <div class="widget-list">
+                @for (r of riesgoAgotamiento.top; track r.articulo_id) {
+                  <div class="widget-item">
+                    <div class="widget-item-info">
+                      <span class="widget-item-code">{{ r.codigo }}</span>
+                      <span class="widget-item-desc">{{ r.descripcion }}</span>
+                    </div>
+                    <mat-chip [class]="getCoberturaClass(r.dias_cobertura)" [matTooltip]="'Stock: ' + r.stock_actual + ' — Demanda proyectada: ' + r.demanda_proyectada_mensual + '/mes'">
+                      {{ getCoberturaLabel(r.dias_cobertura) }}
+                    </mat-chip>
+                  </div>
+                }
+              </div>
+            }
+          </mat-card-content>
+          <mat-card-actions>
+            <a mat-button color="warn" routerLink="/pronosticos">Ver módulo de pronósticos →</a>
+          </mat-card-actions>
+        </mat-card>
+      }
 
       @if (puedeVerInventario) {
         <mat-card class="widget-card">

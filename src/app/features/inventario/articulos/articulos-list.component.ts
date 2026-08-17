@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
@@ -47,6 +47,7 @@ export class ArticulosListComponent implements OnInit {
   private inventarioSvc = inject(InventarioService);
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
+  private cdr = inject(ChangeDetectorRef);
 
   // La tabla vive dentro de un @if(loading) que la destruye y recrea en cada carga,
   // así que MatSort/MatPaginator son instancias nuevas cada vez. Se conectan al
@@ -99,10 +100,12 @@ export class ArticulosListComponent implements OnInit {
         // El @if(loading) recrea la tabla al pasar a false; los setters de ViewChild
         // de arriba reconectan sort/paginator apenas el nodo nuevo exista.
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.error = `Error al cargar los artículos. (${err.status})`;
         this.loading = false;
+        this.cdr.detectChanges();
       },
     });
   }
@@ -140,6 +143,7 @@ export class ArticulosListComponent implements OnInit {
           { duration: 3000 }
         );
       }
+      this.cdr.detectChanges();
     });
   }
 

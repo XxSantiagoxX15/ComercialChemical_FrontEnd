@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { forkJoin } from 'rxjs';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -210,6 +210,7 @@ export class PermisosRolComponent implements OnInit {
   private svc       = inject(UsuariosService);
   private snackBar  = inject(MatSnackBar);
   private dialogRef = inject(MatDialogRef<PermisosRolComponent>);
+  private cdr       = inject(ChangeDetectorRef);
 
   rolesPermisos: any[] = [];
   pendingChanges = new Map<number, Record<string, boolean>>();
@@ -245,10 +246,12 @@ export class PermisosRolComponent implements OnInit {
         this.rolesPermisos = data;
         this.pendingChanges.clear();
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.error   = 'Error al cargar los permisos. Verifique su conexión.';
         this.loading = false;
+        this.cdr.detectChanges();
       },
     });
   }
@@ -272,10 +275,12 @@ export class PermisosRolComponent implements OnInit {
         this.saving = false;
         this.pendingChanges.clear();
         this.snackBar.open('Permisos actualizados correctamente', 'Cerrar', { duration: 3500 });
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.saving = false;
         this.error = err.error?.error || 'Error al guardar los permisos.';
+        this.cdr.detectChanges();
       },
     });
   }

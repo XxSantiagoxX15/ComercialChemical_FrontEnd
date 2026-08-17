@@ -53,8 +53,10 @@
             </ng-container>
 
             <ng-container matColumnDef="usuario">
-              <th mat-header-cell *matHeaderCellDef>Usuario ID</th>
-              <td mat-cell *matCellDef="let row">{{ row.usuario_id ?? '—' }}</td>
+              <th mat-header-cell *matHeaderCellDef>Usuario</th>
+              <td mat-cell *matCellDef="let row">
+                {{ row.usuario_nombre ?? (row.usuario_id ? ('Usuario #' + row.usuario_id) : '—') }}
+              </td>
             </ng-container>
 
             <ng-container matColumnDef="tipo_accion">

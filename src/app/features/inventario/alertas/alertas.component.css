@@ -97,3 +97,9 @@
   width: 36px;
   height: 36px;
 }
+
+.sin-minimo {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  font-style: italic;
+}

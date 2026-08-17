@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -36,18 +36,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private pronosticosSvc  = inject(PronosticosService);
   private auth            = inject(AuthService);
   private snackBar        = inject(MatSnackBar);
+  private cdr             = inject(ChangeDetectorRef);
 
   // Cancela la petición anterior si el usuario hace clic en Actualizar
   // mientras ya hay una carga en curso
   private destroy$ = new Subject<void>();
-  private chartStock: Chart | null = null;
+  private chartMasVendidos: Chart | null = null;
   private chartTimeline: Chart | null = null;
 
   // El canvas vive dentro de un @if condicional — Angular solo crea el nodo en el DOM
   // cuando la condición se vuelve verdadera por primera vez. El setter de ViewChild se
   // dispara justo en ese momento, evitando adivinar un tiempo de espera fijo.
-  @ViewChild('stockCanvas') set stockCanvasRef(ref: ElementRef<HTMLCanvasElement> | undefined) {
-    if (ref) this.renderStockChart();
+  @ViewChild('masVendidosCanvas') set masVendidosCanvasRef(ref: ElementRef<HTMLCanvasElement> | undefined) {
+    if (ref) this.renderMasVendidosChart();
   }
 
   @ViewChild('timelineCanvas') set timelineCanvasRef(ref: ElementRef<HTMLCanvasElement> | undefined) {
@@ -65,7 +66,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   kitsProducibles: any[]      = []; // null = sin acceso
   recomendaciones: any[]      = []; // null = sin acceso
   resumenHistorico: any       = null; // null = sin acceso o sin datos
-  resumenStockMensual: any    = null; // null = sin acceso o sin datos
+  masVendidos: any[]          = []; // null = sin acceso
+  riesgoAgotamiento: any      = null; // null = sin acceso o sin datos
 
   get userRol(): string {
     const user = this.auth.getUser();
@@ -92,12 +94,26 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return { critico: 'chip-critico', alto: 'chip-alto', medio: 'chip-medio', bajo: 'chip-bajo' }[nivel] ?? 'chip-bajo';
   }
 
+  getCoberturaClass(dias: number | null): string {
+    if (dias === null) return 'chip-bajo';
+    if (dias <= 7) return 'chip-critico';
+    if (dias <= 15) return 'chip-alto';
+    if (dias <= 30) return 'chip-medio';
+    return 'chip-bajo';
+  }
+
+  getCoberturaLabel(dias: number | null): string {
+    if (dias === null) return 'Sin datos';
+    if (dias <= 0) return 'Agotado';
+    return `${Math.round(dias)} día(s)`;
+  }
+
   ngOnInit() { this.cargarDatos(); }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-    if (this.chartStock) { this.chartStock.destroy(); this.chartStock = null; }
+    if (this.chartMasVendidos) { this.chartMasVendidos.destroy(); this.chartMasVendidos = null; }
     if (this.chartTimeline) { this.chartTimeline.destroy(); this.chartTimeline = null; }
   }
 
@@ -121,8 +137,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const resumenHistorico$ = this.puedeVerInventario
       ? this.pronosticosSvc.getResumenHistorico(12).pipe(catchError(() => of(null)))
       : of(null);
-    const resumenStockMensual$ = this.puedeVerInventario
-      ? this.inventarioSvc.getResumenStockMensual(12).pipe(catchError(() => of(null)))
+    const masVendidos$ = this.puedeVerInventario
+      ? this.pronosticosSvc.getMasVendidos().pipe(catchError(() => of(null)))
+      : of(null);
+    const riesgoAgotamiento$ = this.puedeVerInventario
+      ? this.pronosticosSvc.getRiesgoAgotamiento(30, 8).pipe(catchError(() => of(null)))
       : of(null);
 
     forkJoin({
@@ -132,7 +151,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       recomendaciones: recomendaciones$,
       kits: kits$,
       resumenHistorico: resumenHistorico$,
-      resumenStockMensual: resumenStockMensual$,
+      masVendidos: masVendidos$,
+      riesgoAgotamiento: riesgoAgotamiento$,
     }).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
@@ -160,97 +180,88 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }
 
         this.resumenHistorico = data.resumenHistorico ?? null;
-        this.resumenStockMensual = data.resumenStockMensual ?? null;
-
+        this.masVendidos = Array.isArray(data.masVendidos) ? data.masVendidos : (data.masVendidos?.results ?? []);
+        this.riesgoAgotamiento = data.riesgoAgotamiento ?? null;
         // El @if(loading) destruye y vuelve a crear el bloque de contenido (incluidos los
         // canvas) en cada carga, así que los setters de ViewChild de arriba se encargan
         // de dibujar los gráficos apenas el nodo nuevo exista — no hace falta llamarlos aquí.
         this.loading = false;
+        this.cdr.detectChanges();
       },
-      error: () => {
+      error: (err) => {
         this.error   = 'Error al cargar los datos del dashboard.';
         this.loading = false;
+        this.cdr.detectChanges();
       },
     });
   }
 
   getNivelUrgencia(articulo: any): string {
-    if (!articulo.stock_minimo || articulo.stock_minimo === 0) return 'bajo';
-    const pct = (articulo.stock_actual / articulo.stock_minimo) * 100;
+    // stock_minimo/stock_actual llegan como texto (DecimalField): "0.000" no es
+    // !0 en JS, así que sin parsear antes la división daba -Infinity/NaN.
+    const minimo = parseFloat(articulo.stock_minimo) || 0;
+    if (minimo <= 0) return 'critico';
+    const actual = parseFloat(articulo.stock_actual) || 0;
+    const pct = (actual / minimo) * 100;
     if (pct <= 25) return 'critico';
     if (pct <= 50) return 'alto';
     return 'medio';
   }
 
-  getPctStock(articulo: any): number {
-    if (!articulo.stock_minimo || articulo.stock_minimo === 0) return 0;
-    return Math.round((articulo.stock_actual / articulo.stock_minimo) * 100);
+  getPctStock(articulo: any): number | null {
+    const minimo = parseFloat(articulo.stock_minimo) || 0;
+    if (minimo <= 0) return null;
+    const actual = parseFloat(articulo.stock_actual) || 0;
+    return Math.round((actual / minimo) * 100);
   }
 
-  private renderStockChart() {
-    if (this.chartStock) { this.chartStock.destroy(); this.chartStock = null; }
-    const canvas = document.getElementById('chartStockCritico') as HTMLCanvasElement;
-    const stockMensual = this.resumenStockMensual?.stock_mensual ?? [];
-    if (!canvas || !stockMensual.length) return;
+  private renderMasVendidosChart() {
+    if (this.chartMasVendidos) { this.chartMasVendidos.destroy(); this.chartMasVendidos = null; }
+    const canvas = document.getElementById('chartMasVendidosDash') as HTMLCanvasElement;
+    if (!canvas || !this.masVendidos.length) return;
 
     Chart.getChart(canvas)?.destroy();
 
-    const labels  = stockMensual.map((s: any) => this.formatMes(s.mes));
-    const totales = stockMensual.map((s: any) => s.total);
-    const minimo  = this.resumenStockMensual?.minimo_total ?? 0;
+    const top10 = this.masVendidos.slice(0, 10);
+    const nombresCompletos = top10.map((r: any) => r.articulo__descripcion ?? r.descripcion ?? r.articulo__codigo ?? r.codigo ?? '');
+    const labels = nombresCompletos.map((n: string) => n.length > 30 ? n.slice(0, 30) + '…' : n);
+    const datos  = top10.map((r: any) => r.total_vendido ?? 0);
+    const colors = ['#1a237e','#283593','#303f9f','#3949ab','#3f51b5',
+                    '#5c6bc0','#7986cb','#9fa8da','#c5cae9','#e8eaf6'];
 
-    this.chartStock = new Chart(canvas, {
-      type: 'line',
+    this.chartMasVendidos = new Chart(canvas, {
+      type: 'bar',
       data: {
         labels,
-        datasets: [
-          {
-            label: 'Stock Total',
-            data: totales,
-            borderColor: '#1a237e',
-            backgroundColor: 'rgba(26,35,126,0.08)',
-            borderWidth: 2,
-            pointRadius: 3,
-            pointBackgroundColor: '#1a237e',
-            fill: true,
-            tension: 0.25,
-          },
-          {
-            label: 'Mínimo Total Requerido (hoy)',
-            data: new Array(labels.length).fill(minimo),
-            borderColor: '#2e7d32',
-            borderWidth: 2,
-            borderDash: [5, 4],
-            pointRadius: 0,
-            fill: false,
-            tension: 0,
-          },
-        ],
+        datasets: [{
+          label: 'Total Vendido',
+          data: datos,
+          backgroundColor: colors,
+          borderRadius: 6,
+        }],
       },
       options: {
+        indexAxis: 'y',
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: {
-            position: 'top',
-            labels: { font: { size: 12, family: 'Inter' }, usePointStyle: true, padding: 16 },
-          },
+          legend: { display: false },
           tooltip: {
             callbacks: {
-              label: (ctx: any) => ` ${ctx.dataset.label}: ${Math.round(ctx.parsed.y).toLocaleString('es-CO')} uds`,
+              title: (items: any) => nombresCompletos[items[0].dataIndex] ?? '',
+              label: (ctx: any) => ` Vendido: ${Math.round(ctx.parsed.x).toLocaleString('es-CO')} uds`,
             },
           },
         },
         scales: {
           x: {
-            grid: { display: false },
-            ticks: { font: { size: 11, family: 'Inter' }, maxRotation: 45 },
-          },
-          y: {
             beginAtZero: true,
             grid: { color: 'rgba(0,0,0,0.05)' },
             ticks: { font: { size: 11, family: 'Inter' } },
-            title: { display: true, text: 'Unidades totales en inventario', font: { size: 11 } },
+          },
+          y: {
+            grid: { display: false },
+            ticks: { font: { size: 11, family: 'Inter' } },
           },
         },
       },

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -34,6 +34,7 @@ export class ArticuloFormComponent implements OnInit {
   private inventarioSvc = inject(InventarioService);
   private dialogRef = inject(MatDialogRef<ArticuloFormComponent>);
   private data = inject(MAT_DIALOG_DATA);
+  private cdr = inject(ChangeDetectorRef);
 
   saving = false;
   error: string | null = null;
@@ -109,6 +110,7 @@ export class ArticuloFormComponent implements OnInit {
       error: (err) => {
         this.saving = false;
         this.error = err.error?.detail || err.error?.message || 'Error al guardar el artículo.';
+        this.cdr.detectChanges();
       },
     });
   }

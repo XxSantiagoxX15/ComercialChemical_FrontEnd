@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -15,6 +15,11 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { MatTabsModule, MatTabChangeEvent } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatSelectModule } from '@angular/material/select';
 import { PronosticosService } from '../../core/services/pronosticos.service';
 import { InventarioService } from '../../core/services/inventario.service';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
@@ -33,7 +38,8 @@ Chart.register(...registerables);
     MatTableModule, MatSortModule, MatProgressSpinnerModule,
     MatChipsModule, MatDividerModule,
     MatAutocompleteModule, MatSnackBarModule,
-    MatTabsModule, MatTooltipModule,
+    MatTabsModule, MatTooltipModule, MatSlideToggleModule, MatButtonToggleModule,
+    MatDatepickerModule, MatNativeDateModule, MatSelectModule,
   ],
   templateUrl: './pronosticos.component.html',
   styleUrl: './pronosticos.component.css',
@@ -42,12 +48,17 @@ export class PronosticosComponent implements OnInit, OnDestroy {
   private pronosticosSvc = inject(PronosticosService);
   private inventarioSvc  = inject(InventarioService);
   private snackBar       = inject(MatSnackBar);
+  private cdr            = inject(ChangeDetectorRef);
 
   // ── Búsqueda de artículo ──────────────────────────────────────────────
   articulosFiltrados: any[] = [];
   articuloSearch = '';
   articuloSeleccionado: any = null;
   filtroCodigo = '';
+  soloExceso = false;
+  horizonteOpciones = [3, 6, 9, 12];
+  horizonteSeleccionado = 6;
+  historialDisponible: number | null = null;
   private searchSubject = new Subject<string>();
 
   // ── Estados ───────────────────────────────────────────────────────────
@@ -55,6 +66,7 @@ export class PronosticosComponent implements OnInit, OnDestroy {
   loadingRecomendaciones = false;
   loadingMasVendidos    = false;
   loadingGeneral        = false;
+  calculandoMasivo      = false;
 
   // ── Datos ─────────────────────────────────────────────────────────────
   resultados: any[]      = [];
@@ -64,6 +76,8 @@ export class PronosticosComponent implements OnInit, OnDestroy {
   masVendidos: any[]     = [];
   analisis: any          = null;
   errorCalculo: string | null = null;
+  modeloGanador: string | null = null;
+  comparacionModelos: any = null;
 
   // La tabla vive dentro de un @if condicional — se conecta el MatSort al
   // dataSource apenas Angular crea el nodo, en vez de adivinar con un setTimeout.
@@ -75,11 +89,12 @@ export class PronosticosComponent implements OnInit, OnDestroy {
   private chartForecast: Chart | null = null;
   private chartMasVendidos: Chart | null = null;
   private chartRecomendaciones: Chart | null = null;
+  private chartComparacion: Chart | null = null;
 
   // ── Columnas tablas ───────────────────────────────────────────────────
   displayedColumnsResultados      = ['fecha', 'demanda_proyectada', 'barra'];
   displayedColumnsMasVendidos     = ['pos', 'codigo', 'descripcion', 'total_vendido'];
-  displayedColumnsRecomendaciones = ['pos', 'articulo', 'stock_actual', 'demanda_proyectada', 'cantidad_recomendada', 'prioridad', 'acciones'];
+  displayedColumnsRecomendaciones = ['pos', 'articulo', 'stock_actual', 'demanda_proyectada', 'cantidad_recomendada', 'prioridad', 'exceso', 'acciones'];
 
   // ── EOQ ───────────────────────────────────────────────────────────────
   eoq: any = null;
@@ -91,6 +106,29 @@ export class PronosticosComponent implements OnInit, OnDestroy {
   kitsProducibles: any[] = [];
   loadingKitsProducibles = false;
   displayedColumnsKits = ['codigo', 'producible', 'componente', 'detalle'];
+
+  // ── Comparar periodos ───────────────────────
+  comp_p1Desde: Date | null = null;
+  comp_p1Hasta: Date | null = null;
+  comp_p2Desde: Date | null = null;
+  comp_p2Hasta: Date | null = null;
+  comparacionArticuloSearch = '';
+  comparacionArticuloSeleccionado: any = null;
+  comparacionArticulosFiltrados: any[] = [];
+  comparando = false;
+  resultadoComparacion: any = null;
+  errorComparacion: string | null = null;
+  displayedColumnsComparacion = ['articulo', 'p1', 'p2', 'variacion'];
+  private comparacionSearchSubject = new Subject<string>();
+  // ── Reporte de necesidades por mes ──────────────────────────
+  mesesDisponibles: string[] = [];
+  mesSeleccionado: string | null = null;
+  loadingMeses = false;
+  loadingReporte = false;
+  reporteNecesidades: any = null;
+  errorReporte: string | null = null;
+  descargandoPdfReporte = false;
+  displayedColumnsReporte = ['codigo', 'demanda', 'stock', 'comprar'];
 
   ngOnInit() {
     // 'prioridad' es texto (critico/alto/medio/bajo) — sin esto ordenaría
@@ -115,6 +153,17 @@ export class PronosticosComponent implements OnInit, OnDestroy {
         : of({ articulos: [] }))
     ).subscribe((res: any) => {
       this.articulosFiltrados = res?.articulos ?? (Array.isArray(res) ? res : []);
+      this.cdr.detectChanges();
+    });
+    this.comparacionSearchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(q => q.length >= 2
+        ? this.inventarioSvc.getArticulos({ buscar: q, limit: 20 })
+        : of({ articulos: [] }))
+    ).subscribe((res: any) => {
+      this.comparacionArticulosFiltrados = res?.articulos ?? (Array.isArray(res) ? res : []);
+      this.cdr.detectChanges();
     });
   }
 
@@ -124,12 +173,15 @@ export class PronosticosComponent implements OnInit, OnDestroy {
 
   // ── Tab change — re-render charts when tab becomes visible ──────────
   onTabChange(event: MatTabChangeEvent) {
-    // Tab 1 = Más Vendidos, Tab 2 = Recomendaciones
+    // Tab 1 = Más Vendidos, Tab 2 = Recomendaciones, Tab 4 = Comparar Periodos
     if (event.index === 1 && this.masVendidos.length) {
       setTimeout(() => this.renderMasVendidosChart(), 50);
     }
     if (event.index === 2 && this.recomendacionesFiltradas.length) {
       setTimeout(() => this.renderRecomendacionesChart(), 50);
+    }
+    if (event.index === 4 && this.resultadoComparacion?.detalle?.length) {
+      setTimeout(() => this.renderComparacionChart(), 50);
     }
   }
 
@@ -138,6 +190,7 @@ export class PronosticosComponent implements OnInit, OnDestroy {
     this.cargarMasVendidos();
     this.cargarRecomendaciones();
     this.cargarKitsProducibles();
+    this.cargarMesesDisponibles();
   }
 
   // ── Producción (kits producibles) ───────────────────────────────────────
@@ -147,8 +200,9 @@ export class PronosticosComponent implements OnInit, OnDestroy {
       next: (res: any) => {
         this.kitsProducibles = res?.kits ?? (Array.isArray(res) ? res : []);
         this.loadingKitsProducibles = false;
+        this.cdr.detectChanges();
       },
-      error: () => { this.loadingKitsProducibles = false; },
+      error: () => { this.loadingKitsProducibles = false; this.cdr.detectChanges(); },
     });
   }
 
@@ -162,6 +216,26 @@ export class PronosticosComponent implements OnInit, OnDestroy {
   seleccionarArticulo(art: any) {
     this.articuloSeleccionado = art;
     this.articuloSearch = `${art.codigo} - ${art.descripcion}`;
+    this.historialDisponible = null;
+    this.pronosticosSvc.getAnalisis(art.id).subscribe({
+      next: (res: any) => {
+        const periodos: number = res?.error ? 0 : (res.periodos ?? 0);
+        this.historialDisponible = periodos;
+        // Si el horizonte ya elegido quedó sin historial suficiente para este
+        // artículo, bajamos automáticamente a la opción válida más grande.
+        if (this.horizonteSeleccionado > periodos) {
+          const validos = this.horizonteOpciones.filter(h => h <= periodos);
+          this.horizonteSeleccionado = validos.length ? Math.max(...validos) : this.horizonteOpciones[0];
+        }
+        this.cdr.detectChanges();
+      },
+      error: () => { this.historialDisponible = 0; this.cdr.detectChanges(); },
+    });
+  }
+
+  esHorizonteDeshabilitado(meses: number): boolean {
+    if (this.historialDisponible === null) return false;
+    return this.historialDisponible < meses;
   }
 
   // ── Calcular pronóstico ───────────────────────────────────────────────
@@ -177,18 +251,26 @@ export class PronosticosComponent implements OnInit, OnDestroy {
     this.errorCalculo = null;
     this.eoq          = null;
     this.errorEoq      = null;
+    this.modeloGanador = null;
+    this.comparacionModelos = null;
     this.destroyChart('forecast');
 
     // Análisis estadístico en paralelo
     this.pronosticosSvc.getAnalisis(id).subscribe({
-      next: (res: any) => { this.analisis = res?.error ? null : res; },
-      error: () => {},
+      next: (res: any) => { this.analisis = res?.error ? null : res; this.cdr.detectChanges(); },
+      error: () => { this.cdr.detectChanges(); },
     });
 
-    this.pronosticosSvc.calcularPrediccion(id, 'suavizacion_exponencial', 6).subscribe({
+    // 'auto': prueba los modelos aplicables según el historial del artículo
+    // (suavización exponencial, regresión, ARIMA si hay datos) y se queda con
+    // el que dio menor error en un backtest, en vez de forzar siempre el mismo.
+    this.pronosticosSvc.calcularPrediccion(id, 'auto', this.horizonteSeleccionado).subscribe({
       next: (res: any) => {
         this.resultados = Array.isArray(res) ? res : (res.predicciones ?? []);
+        this.modeloGanador = res?.modelo_ganador ?? null;
+        this.comparacionModelos = res?.comparacion_modelos ?? null;
         this.calculando = false;
+        this.cdr.detectChanges();
         setTimeout(() => this.renderForecastChart(), 100);
         this.calcularEoq(id);
       },
@@ -198,6 +280,7 @@ export class PronosticosComponent implements OnInit, OnDestroy {
         this.errorCalculo = e?.error
           ? `${e.error}${e.periodos_disponibles !== undefined ? ` (disponibles: ${e.periodos_disponibles})` : ''}`
           : (err.error?.detail || 'Error al calcular el pronóstico.');
+        this.cdr.detectChanges();
       },
     });
   }
@@ -211,10 +294,34 @@ export class PronosticosComponent implements OnInit, OnDestroy {
       next: (res: any) => {
         this.eoq = res;
         this.calculandoEoq = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.calculandoEoq = false;
         this.errorEoq = err.error?.error || 'No se pudo calcular el EOQ para este artículo.';
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  // ── Pronóstico masivo (todo el catálogo de una vez) ─────────────────────
+  calcularTodosLosPronosticos() {
+    this.calculandoMasivo = true;
+    this.pronosticosSvc.calcularPronosticosMasivo('auto', 3).subscribe({
+      next: (res: any) => {
+        this.calculandoMasivo = false;
+        this.snackBar.open(
+          `Pronóstico calculado para ${res.calculados}/${res.total_articulos} artículos.`,
+          'Cerrar', { duration: 5000 },
+        );
+        this.cargarTodo();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.calculandoMasivo = false;
+        const msg = err.error?.detail || 'Error al calcular el pronóstico masivo.';
+        this.snackBar.open(msg, 'Cerrar', { duration: 5000, panelClass: 'snack-error' });
+        this.cdr.detectChanges();
       },
     });
   }
@@ -226,11 +333,190 @@ export class PronosticosComponent implements OnInit, OnDestroy {
       next: (orden: any) => {
         this.generandoOrdenPara = null;
         this.snackBar.open(`Orden ${orden.numero_orden} creada correctamente`, 'Cerrar', { duration: 4000 });
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.generandoOrdenPara = null;
         const msg = err.error?.error || err.error?.detail || 'Error al generar la orden de compra.';
         this.snackBar.open(msg, 'Cerrar', { duration: 5000, panelClass: 'snack-error' });
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  // ── Comparar periodos ───────────────────────────────────────────────────
+  aplicarPresetComparacion(preset: 'mes' | 'trimestre' | 'anio') {
+    const hoy = new Date();
+    let p1Desde: Date, p2Desde: Date, p2Hasta: Date;
+    if (preset === 'mes') {
+      p1Desde = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+      p2Hasta = new Date(hoy.getFullYear(), hoy.getMonth(), 0);
+      p2Desde = new Date(p2Hasta.getFullYear(), p2Hasta.getMonth(), 1);
+    } else if (preset === 'trimestre') {
+      const inicioTrimestre = Math.floor(hoy.getMonth() / 3) * 3;
+      p1Desde = new Date(hoy.getFullYear(), inicioTrimestre, 1);
+      p2Hasta = new Date(p1Desde.getFullYear(), p1Desde.getMonth(), 0);
+      p2Desde = new Date(p2Hasta.getFullYear(), p2Hasta.getMonth() - 2, 1);
+    } else {
+      p1Desde = new Date(hoy.getFullYear(), 0, 1);
+      p2Desde = new Date(hoy.getFullYear() - 1, 0, 1);
+      p2Hasta = new Date(hoy.getFullYear() - 1, 11, 31);
+    }
+    this.comp_p1Desde = p1Desde;
+    this.comp_p1Hasta = hoy;
+    this.comp_p2Desde = p2Desde;
+    this.comp_p2Hasta = p2Hasta;
+  }
+
+  onComparacionArticuloSearch(event: Event) {
+    const q = (event.target as HTMLInputElement).value;
+    this.comparacionArticuloSearch = q;
+    if (!q) this.comparacionArticuloSeleccionado = null;
+    this.comparacionSearchSubject.next(q);
+  }
+
+  seleccionarArticuloComparacion(art: any) {
+    this.comparacionArticuloSeleccionado = art;
+    this.comparacionArticuloSearch = `${art.codigo} - ${art.descripcion}`;
+  }
+
+  limpiarArticuloComparacion() {
+    this.comparacionArticuloSeleccionado = null;
+    this.comparacionArticuloSearch = '';
+  }
+
+  private toISO(d: Date): string {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  compararPeriodos() {
+    if (!this.comp_p1Desde || !this.comp_p1Hasta || !this.comp_p2Desde || !this.comp_p2Hasta) {
+      this.snackBar.open('Selecciona las fechas de ambos periodos.', 'Cerrar', { duration: 4000 });
+      return;
+    }
+    this.comparando = true;
+    this.errorComparacion = null;
+    this.resultadoComparacion = null;
+    this.destroyChart('comparacion');
+    const params: any = {
+      desde1: this.toISO(this.comp_p1Desde), hasta1: this.toISO(this.comp_p1Hasta),
+      desde2: this.toISO(this.comp_p2Desde), hasta2: this.toISO(this.comp_p2Hasta),
+    };
+    if (this.comparacionArticuloSeleccionado) params.articulo_id = this.comparacionArticuloSeleccionado.id;
+    this.pronosticosSvc.compararPeriodos(params).subscribe({
+      next: (res: any) => {
+        this.resultadoComparacion = res;
+        this.comparando = false;
+        this.cdr.detectChanges();
+        setTimeout(() => this.renderComparacionChart(), 50);
+      },
+      error: (err) => {
+        this.comparando = false;
+        this.errorComparacion = err.error?.error || 'Error al comparar los periodos.';
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  // ── Reporte de necesidades por mes ─────────────────────────────────────
+  cargarMesesDisponibles() {
+    this.loadingMeses = true;
+    this.pronosticosSvc.getMesesDisponibles().subscribe({
+      next: (res: any) => {
+        this.mesesDisponibles = res?.meses ?? [];
+        if (!this.mesSeleccionado && this.mesesDisponibles.length) {
+          this.mesSeleccionado = this.mesesDisponibles[0];
+        }
+        this.loadingMeses = false;
+        this.cdr.detectChanges();
+      },
+      error: () => { this.loadingMeses = false; this.cdr.detectChanges(); },
+    });
+  }
+
+  getNombreMes(mes: string | null): string {
+    if (!mes) return '';
+    const nombres = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    const [anio, mesNum] = mes.split('-').map(Number);
+    return `${nombres[mesNum - 1]} ${anio}`;
+  }
+
+  generarReporte() {
+    if (!this.mesSeleccionado) return;
+    this.loadingReporte = true;
+    this.errorReporte = null;
+    this.reporteNecesidades = null;
+    this.pronosticosSvc.getReporteNecesidades(this.mesSeleccionado).subscribe({
+      next: (res: any) => {
+        this.reporteNecesidades = res;
+        this.loadingReporte = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.loadingReporte = false;
+        this.errorReporte = err.error?.error || 'Error al generar el reporte.';
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  descargarReportePdf() {
+    if (!this.mesSeleccionado) return;
+    this.descargandoPdfReporte = true;
+    this.pronosticosSvc.descargarReporteNecesidadesPdf(this.mesSeleccionado).subscribe({
+      next: (blob: Blob) => {
+        this.descargandoPdfReporte = false;
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `reporte_necesidades_${this.mesSeleccionado}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.descargandoPdfReporte = false;
+        this.snackBar.open('Error al generar el PDF del reporte.', 'Cerrar', { duration: 4000, panelClass: 'snack-error' });
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  private descargarBlob(blob: Blob, filename: string) {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  exportandoComparacion = false;
+  exportarComparacion(formato: 'pdf' | 'excel') {
+    if (!this.comp_p1Desde || !this.comp_p1Hasta || !this.comp_p2Desde || !this.comp_p2Hasta) {
+      this.snackBar.open('Selecciona las fechas de ambos periodos.', 'Cerrar', { duration: 4000 });
+      return;
+    }
+    this.exportandoComparacion = true;
+    const params: any = {
+      desde1: this.toISO(this.comp_p1Desde), hasta1: this.toISO(this.comp_p1Hasta),
+      desde2: this.toISO(this.comp_p2Desde), hasta2: this.toISO(this.comp_p2Hasta),
+    };
+    if (this.comparacionArticuloSeleccionado) params.articulo_id = this.comparacionArticuloSeleccionado.id;
+    this.pronosticosSvc.exportarComparacion(formato, params).subscribe({
+      next: (blob: Blob) => {
+        this.exportandoComparacion = false;
+        this.descargarBlob(blob, `comparacion_periodos.${formato === 'excel' ? 'xlsx' : 'pdf'}`);
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.exportandoComparacion = false;
+        this.snackBar.open('Error al exportar la comparación.', 'Cerrar', { duration: 4000, panelClass: 'snack-error' });
+        this.cdr.detectChanges();
       },
     });
   }
@@ -242,10 +528,28 @@ export class PronosticosComponent implements OnInit, OnDestroy {
       next: (res: any) => {
         this.masVendidos = Array.isArray(res) ? res : (res.results ?? []);
         this.loadingMasVendidos = false;
+        this.cdr.detectChanges();
         // No renderizar aquí — el tab puede estar oculto.
         // Se renderiza en onTabChange cuando el usuario abre el tab.
       },
-      error: () => { this.loadingMasVendidos = false; },
+      error: () => { this.loadingMasVendidos = false; this.cdr.detectChanges(); },
+    });
+  }
+
+  exportandoMasVendidos = false;
+  exportarMasVendidos(formato: 'pdf' | 'excel') {
+    this.exportandoMasVendidos = true;
+    this.pronosticosSvc.exportarMasVendidos(formato).subscribe({
+      next: (blob: Blob) => {
+        this.exportandoMasVendidos = false;
+        this.descargarBlob(blob, `mas_vendidos.${formato === 'excel' ? 'xlsx' : 'pdf'}`);
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.exportandoMasVendidos = false;
+        this.snackBar.open('Error al exportar el reporte.', 'Cerrar', { duration: 4000, panelClass: 'snack-error' });
+        this.cdr.detectChanges();
+      },
     });
   }
 
@@ -257,19 +561,24 @@ export class PronosticosComponent implements OnInit, OnDestroy {
         this.recomendaciones = Array.isArray(res) ? res : (res.recomendaciones ?? []);
         this.aplicarFiltro();
         this.loadingRecomendaciones = false;
+        this.cdr.detectChanges();
         // No renderizar aquí — el tab puede estar oculto.
       },
-      error: () => { this.loadingRecomendaciones = false; },
+      error: () => { this.loadingRecomendaciones = false; this.cdr.detectChanges(); },
     });
   }
 
   aplicarFiltro() {
     const f = this.filtroCodigo.trim().toLowerCase();
-    this.recomendacionesFiltradas = f
+    let lista = f
       ? this.recomendaciones.filter(r =>
           (r.codigo ?? '').toLowerCase().includes(f) ||
           (r.descripcion ?? '').toLowerCase().includes(f))
       : [...this.recomendaciones];
+    if (this.soloExceso) {
+      lista = lista.filter(r => r.exceso_inventario);
+    }
+    this.recomendacionesFiltradas = lista;
     this.dataSourceRecomendaciones.data = this.recomendacionesFiltradas;
     // Solo re-renderizar si el canvas ya existe en el DOM (tab visible)
     const canvas = document.getElementById('chartRecomendaciones');
@@ -286,6 +595,7 @@ export class PronosticosComponent implements OnInit, OnDestroy {
     this.articuloSeleccionado = null;
     this.articuloSearch       = '';
     this.filtroCodigo         = '';
+    this.historialDisponible  = null;
     this.destroyCharts();
   }
 
@@ -326,6 +636,7 @@ export class PronosticosComponent implements OnInit, OnDestroy {
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
           legend: { position: 'top' },
           title: {
@@ -369,6 +680,7 @@ export class PronosticosComponent implements OnInit, OnDestroy {
       options: {
         indexAxis: 'y',
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
           legend: { display: false },
           title: { display: true, text: 'Top 10 Artículos Más Vendidos', font: { size: 14, weight: 'bold' } },
@@ -407,6 +719,7 @@ export class PronosticosComponent implements OnInit, OnDestroy {
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
           legend: { position: 'top' },
           title: { display: true, text: 'Recomendaciones de Compra', font: { size: 14, weight: 'bold' } },
@@ -416,17 +729,51 @@ export class PronosticosComponent implements OnInit, OnDestroy {
     });
   }
 
+  // ── Gráfica Comparación de Periodos ────────────────────────────────────
+  private renderComparacionChart() {
+    this.destroyChart('comparacion');
+    const canvas = document.getElementById('chartComparacion') as HTMLCanvasElement;
+    const data = this.resultadoComparacion?.detalle?.slice(0, 15) ?? [];
+    if (!canvas || !data.length) return;
+
+    const labels = data.map((r: any) => r.codigo ?? '');
+    const p1 = data.map((r: any) => r.unidades_periodo_1 ?? 0);
+    const p2 = data.map((r: any) => r.unidades_periodo_2 ?? 0);
+
+    this.chartComparacion = new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Periodo 1', data: p1, backgroundColor: 'rgba(57,73,171,0.75)', borderRadius: 4 },
+          { label: 'Periodo 2', data: p2, backgroundColor: 'rgba(158,158,158,0.75)', borderRadius: 4 },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'top' },
+          title: { display: true, text: 'Unidades vendidas por artículo — Periodo 1 vs. Periodo 2', font: { size: 14, weight: 'bold' } },
+        },
+        scales: { y: { beginAtZero: true } },
+      },
+    });
+  }
+
   // ── Destroy helpers ───────────────────────────────────────────────────
-  private destroyChart(which: 'forecast' | 'masVendidos' | 'recomendaciones') {
+  private destroyChart(which: 'forecast' | 'masVendidos' | 'recomendaciones' | 'comparacion') {
     if (which === 'forecast'        && this.chartForecast)        { this.chartForecast.destroy();        this.chartForecast = null; }
     if (which === 'masVendidos'     && this.chartMasVendidos)     { this.chartMasVendidos.destroy();     this.chartMasVendidos = null; }
     if (which === 'recomendaciones' && this.chartRecomendaciones) { this.chartRecomendaciones.destroy(); this.chartRecomendaciones = null; }
+    if (which === 'comparacion'     && this.chartComparacion)     { this.chartComparacion.destroy();     this.chartComparacion = null; }
   }
 
   private destroyCharts() {
     this.destroyChart('forecast');
     this.destroyChart('masVendidos');
     this.destroyChart('recomendaciones');
+    this.destroyChart('comparacion');
   }
 
   // ── Helpers UI ────────────────────────────────────────────────────────
@@ -448,5 +795,26 @@ export class PronosticosComponent implements OnInit, OnDestroy {
 
   getPrioridadLabel(p: string): string {
     return ({ critico: '🔴 Crítico', alto: '🟠 Alto', medio: '🟡 Medio', bajo: '🟢 Bajo' } as any)[p] ?? p;
+  }
+
+  getModeloLabel(modelo: string): string {
+    const map: any = {
+      suavizacion_exponencial: 'Suavización Exponencial',
+      arima: 'ARIMA',
+      regresion_minimos_cuadrados: 'Regresión de Mínimos Cuadrados',
+    };
+    return map[modelo] ?? modelo;
+  }
+
+  numeroModelosComparados(): number {
+    return this.comparacionModelos ? Object.keys(this.comparacionModelos).length : 0;
+  }
+
+  totalExceso(): number {
+    return this.recomendaciones.filter(r => r.exceso_inventario).length;
+  }
+
+  itemsAComprar(): any[] {
+    return this.reporteNecesidades?.items?.filter((it: any) => it.cantidad_a_comprar > 0) ?? [];
   }
 }

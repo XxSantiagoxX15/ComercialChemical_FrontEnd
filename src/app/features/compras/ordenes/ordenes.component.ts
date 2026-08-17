@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormsModule } from '@angular/forms';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
@@ -56,9 +56,18 @@ export class OrdenesComponent implements OnInit {
   private inventarioSvc = inject(InventarioService);
   private snackBar = inject(MatSnackBar);
   private fb = inject(FormBuilder);
+  private cdr = inject(ChangeDetectorRef);
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+  // La tabla vive dentro de un @if(loading) que la destruye y recrea en cada carga,
+  // así que MatSort/MatPaginator son instancias nuevas cada vez. Se conectan al
+  // dataSource apenas Angular las crea, en vez de adivinar con un setTimeout.
+  @ViewChild(MatPaginator) set paginatorRef(mp: MatPaginator | undefined) {
+    if (mp) this.dataSource.paginator = mp;
+  }
+
+  @ViewChild(MatSort) set sortRef(ms: MatSort | undefined) {
+    if (ms) this.dataSource.sort = ms;
+  }
 
   displayedColumns = ['id', 'articulo', 'cantidad', 'precio', 'proveedor', 'estado', 'fecha', 'acciones'];
   dataSource = new MatTableDataSource<any>([]);
@@ -89,6 +98,7 @@ export class OrdenesComponent implements OnInit {
       switchMap(q => q.length >= 2 ? this.inventarioSvc.getArticulos({ buscar: q, limit: 20 }) : of({ articulos: [] }))
     ).subscribe((res: any) => {
       this.articulosFiltrados = res?.articulos ?? (Array.isArray(res) ? res : []);
+      this.cdr.detectChanges();
     });
   }
 
@@ -102,15 +112,13 @@ export class OrdenesComponent implements OnInit {
         // Backend retorna { ordenes: [...], total: N }
         const data = res?.ordenes ?? (Array.isArray(res) ? res : []);
         this.dataSource.data = data;
-        setTimeout(() => {
-          this.dataSource.paginator = this.paginator;
-          this.dataSource.sort = this.sort;
-        });
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.error = 'Error al cargar las órdenes.';
         this.loading = false;
+        this.cdr.detectChanges();
       },
     });
   }
@@ -141,11 +149,13 @@ export class OrdenesComponent implements OnInit {
         this.articuloSearch = '';
         this.articuloSeleccionado = null;
         this.cargarOrdenes();
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.saving = false;
         const msg = err.error?.detail || 'Error al crear la orden.';
         this.snackBar.open(msg, 'Cerrar', { duration: 5000, panelClass: 'snack-error' });
+        this.cdr.detectChanges();
       },
     });
   }
@@ -155,10 +165,29 @@ export class OrdenesComponent implements OnInit {
       next: () => {
         this.snackBar.open(`Orden ${estado} correctamente`, 'Cerrar', { duration: 3000 });
         this.cargarOrdenes();
+        this.cdr.detectChanges();
       },
       error: (err) => {
         const msg = err.error?.detail || 'Error al actualizar el estado.';
         this.snackBar.open(msg, 'Cerrar', { duration: 5000, panelClass: 'snack-error' });
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  descargarPdf(orden: any) {
+    this.comprasSvc.descargarOrdenPdf(orden.id).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${orden.numero_orden}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => {
+        this.snackBar.open('Error al generar el PDF de la orden.', 'Cerrar', { duration: 3000, panelClass: 'snack-error' });
+        this.cdr.detectChanges();
       },
     });
   }
