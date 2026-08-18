@@ -64,7 +64,10 @@ export class LayoutShellComponent {
     { label: 'Alertas',      icon: 'notifications_active',route: '/inventario/alertas',      adminOnly: false },
     { label: 'Compras',      icon: 'shopping_cart',       route: '/compras/ordenes',         adminOnly: false },
     { label: 'Cotizador',    icon: 'request_quote',       route: '/compras/cotizador',       adminOnly: false },
+<<<<<<< HEAD
     { label: 'Calculadora de precios', icon: 'calculate', route: '/inventario/calculadora',     adminOnly: false },
+=======
+>>>>>>> 1298a77a147d64e2ea814727f8c6855468eef0b0
     { label: 'Pronósticos',  icon: 'trending_up',         route: '/pronosticos',             adminOnly: false },
     { label: 'Importación',  icon: 'upload_file',         route: '/importacion',             adminOnly: false },
     { label: 'Auditoría',    icon: 'manage_search',       route: '/auditoria',               adminOnly: true  },
