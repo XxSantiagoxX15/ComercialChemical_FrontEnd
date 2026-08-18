@@ -1,0 +1,498 @@
+[1m[33mPrebundling has been configured but will not be used because scripts optimization is enabled.[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'renderMasVendidosChart' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:50:18:
+[37m      50 │     if (ref) this.[32mrenderMasVendidosChart[37m();
+         ╵                   [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:115:13:
+[37m      115 │     if (this.[32mchartStock[37m) { this.chartStock.destroy(); this.chartS...
+          ╵              [32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:115:32:
+[37m      115 │ ... (this.chartStock) { this.[32mchartStock[37m.destroy(); this.chartStoc...
+          ╵                              [32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:115:59:
+[37m      115 │ ...hartStock) { this.chartStock.destroy(); this.[32mchartStock[37m = null; }
+          ╵                                                 [32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:211:13:
+[37m      211 │     if (this.[32mchartStock[37m) { this.chartStock.destroy(); this.chartS...
+          ╵              [32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:211:32:
+[37m      211 │ ... (this.chartStock) { this.[32mchartStock[37m.destroy(); this.chartStoc...
+          ╵                              [32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:211:59:
+[37m      211 │ ...hartStock) { this.chartStock.destroy(); this.[32mchartStock[37m = null; }
+          ╵                                                 [32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:222:9:
+[37m      222 │     this.[32mchartStock[37m = new Chart(canvas, {
+          ╵          [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'resumenStockMensual' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.html:125:31:
+[37m      125 │ ...puedeVerInventario && [32mresumenStockMensual[37m?.stock_mensual?.leng...
+          ╵                          [32m~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component DashboardComponent.
+
+    src/app/features/dashboard/dashboard.component.ts:30:15:
+[37m      30 │   templateUrl: [32m'./dashboard.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'renderMasVendidosChart' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:50:18:
+[37m      50 │     if (ref) this.[32mrenderMasVendidosChart[37m();
+         ╵                   [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:115:13:
+[37m      115 │     if (this.[32mchartStock[37m) { this.chartStock.destroy(); this.chartS...
+          ╵              [32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:115:32:
+[37m      115 │ ... (this.chartStock) { this.[32mchartStock[37m.destroy(); this.chartStoc...
+          ╵                              [32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:115:59:
+[37m      115 │ ...hartStock) { this.chartStock.destroy(); this.[32mchartStock[37m = null; }
+          ╵                                                 [32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'resumenStockMensual' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:182:13:
+[37m      182 │         this.[32mresumenStockMensual[37m = data.resumenStockMensual ?? null;
+          ╵              [32m~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:211:13:
+[37m      211 │     if (this.[32mchartStock[37m) { this.chartStock.destroy(); this.chartS...
+          ╵              [32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:211:32:
+[37m      211 │ ... (this.chartStock) { this.[32mchartStock[37m.destroy(); this.chartStoc...
+          ╵                              [32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:211:59:
+[37m      211 │ ...hartStock) { this.chartStock.destroy(); this.[32mchartStock[37m = null; }
+          ╵                                                 [32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'resumenStockMensual' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:213:30:
+[37m      213 │ ...nst stockMensual = this.[32mresumenStockMensual[37m?.stock_mensual ?? [];
+          ╵                            [32m~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'resumenStockMensual' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:220:25:
+[37m      220 │     const minimo  = this.[32mresumenStockMensual[37m?.minimo_total ?? 0;
+          ╵                          [32m~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:222:9:
+[37m      222 │     this.[32mchartStock[37m = new Chart(canvas, {
+          ╵          [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'resumenStockMensual' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.html:125:31:
+[37m      125 │ ...puedeVerInventario && [32mresumenStockMensual[37m?.stock_mensual?.leng...
+          ╵                          [32m~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component DashboardComponent.
+
+    src/app/features/dashboard/dashboard.component.ts:30:15:
+[37m      30 │   templateUrl: [32m'./dashboard.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'renderMasVendidosChart' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:50:18:
+[37m      50 │     if (ref) this.[32mrenderMasVendidosChart[37m();
+         ╵                   [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'resumenStockMensual' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:182:13:
+[37m      182 │         this.[32mresumenStockMensual[37m = data.resumenStockMensual ?? null;
+          ╵              [32m~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:211:13:
+[37m      211 │     if (this.[32mchartStock[37m) { this.chartStock.destroy(); this.chartS...
+          ╵              [32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:211:32:
+[37m      211 │ ... (this.chartStock) { this.[32mchartStock[37m.destroy(); this.chartStoc...
+          ╵                              [32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:211:59:
+[37m      211 │ ...hartStock) { this.chartStock.destroy(); this.[32mchartStock[37m = null; }
+          ╵                                                 [32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'resumenStockMensual' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:213:30:
+[37m      213 │ ...nst stockMensual = this.[32mresumenStockMensual[37m?.stock_mensual ?? [];
+          ╵                            [32m~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'resumenStockMensual' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:220:25:
+[37m      220 │     const minimo  = this.[32mresumenStockMensual[37m?.minimo_total ?? 0;
+          ╵                          [32m~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:222:9:
+[37m      222 │     this.[32mchartStock[37m = new Chart(canvas, {
+          ╵          [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'resumenStockMensual' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.html:125:31:
+[37m      125 │ ...puedeVerInventario && [32mresumenStockMensual[37m?.stock_mensual?.leng...
+          ╵                          [32m~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component DashboardComponent.
+
+    src/app/features/dashboard/dashboard.component.ts:30:15:
+[37m      30 │   templateUrl: [32m'./dashboard.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'renderMasVendidosChart' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:50:18:
+[37m      50 │     if (ref) this.[32mrenderMasVendidosChart[37m();
+         ╵                   [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'resumenStockMensual$'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:153:27:
+[37m      153 │       resumenStockMensual: [32mresumenStockMensual$[37m,
+          ╵                            [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'resumenStockMensual' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:182:13:
+[37m      182 │         this.[32mresumenStockMensual[37m = data.resumenStockMensual ?? null;
+          ╵              [32m~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:211:13:
+[37m      211 │     if (this.[32mchartStock[37m) { this.chartStock.destroy(); this.chartS...
+          ╵              [32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:211:32:
+[37m      211 │ ... (this.chartStock) { this.[32mchartStock[37m.destroy(); this.chartStoc...
+          ╵                              [32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:211:59:
+[37m      211 │ ...hartStock) { this.chartStock.destroy(); this.[32mchartStock[37m = null; }
+          ╵                                                 [32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'resumenStockMensual' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:213:30:
+[37m      213 │ ...nst stockMensual = this.[32mresumenStockMensual[37m?.stock_mensual ?? [];
+          ╵                            [32m~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'resumenStockMensual' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:220:25:
+[37m      220 │     const minimo  = this.[32mresumenStockMensual[37m?.minimo_total ?? 0;
+          ╵                          [32m~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:222:9:
+[37m      222 │     this.[32mchartStock[37m = new Chart(canvas, {
+          ╵          [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'resumenStockMensual' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.html:125:31:
+[37m      125 │ ...puedeVerInventario && [32mresumenStockMensual[37m?.stock_mensual?.leng...
+          ╵                          [32m~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component DashboardComponent.
+
+    src/app/features/dashboard/dashboard.component.ts:30:15:
+[37m      30 │   templateUrl: [32m'./dashboard.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'renderMasVendidosChart' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:50:18:
+[37m      50 │     if (ref) this.[32mrenderMasVendidosChart[37m();
+         ╵                   [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'resumenStockMensual' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:182:13:
+[37m      182 │         this.[32mresumenStockMensual[37m = data.resumenStockMensual ?? null;
+          ╵              [32m~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:211:13:
+[37m      211 │     if (this.[32mchartStock[37m) { this.chartStock.destroy(); this.chartS...
+          ╵              [32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:211:32:
+[37m      211 │ ... (this.chartStock) { this.[32mchartStock[37m.destroy(); this.chartStoc...
+          ╵                              [32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:211:59:
+[37m      211 │ ...hartStock) { this.chartStock.destroy(); this.[32mchartStock[37m = null; }
+          ╵                                                 [32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'resumenStockMensual' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:213:30:
+[37m      213 │ ...nst stockMensual = this.[32mresumenStockMensual[37m?.stock_mensual ?? [];
+          ╵                            [32m~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'resumenStockMensual' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:220:25:
+[37m      220 │     const minimo  = this.[32mresumenStockMensual[37m?.minimo_total ?? 0;
+          ╵                          [32m~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:222:9:
+[37m      222 │     this.[32mchartStock[37m = new Chart(canvas, {
+          ╵          [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'resumenStockMensual' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.html:125:31:
+[37m      125 │ ...puedeVerInventario && [32mresumenStockMensual[37m?.stock_mensual?.leng...
+          ╵                          [32m~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component DashboardComponent.
+
+    src/app/features/dashboard/dashboard.component.ts:30:15:
+[37m      30 │   templateUrl: [32m'./dashboard.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'renderMasVendidosChart' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:50:18:
+[37m      50 │     if (ref) this.[32mrenderMasVendidosChart[37m();
+         ╵                   [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:211:13:
+[37m      211 │     if (this.[32mchartStock[37m) { this.chartStock.destroy(); this.chartS...
+          ╵              [32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:211:32:
+[37m      211 │ ... (this.chartStock) { this.[32mchartStock[37m.destroy(); this.chartStoc...
+          ╵                              [32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:211:59:
+[37m      211 │ ...hartStock) { this.chartStock.destroy(); this.[32mchartStock[37m = null; }
+          ╵                                                 [32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'resumenStockMensual' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:213:30:
+[37m      213 │ ...nst stockMensual = this.[32mresumenStockMensual[37m?.stock_mensual ?? [];
+          ╵                            [32m~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'resumenStockMensual' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:220:25:
+[37m      220 │     const minimo  = this.[32mresumenStockMensual[37m?.minimo_total ?? 0;
+          ╵                          [32m~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:222:9:
+[37m      222 │     this.[32mchartStock[37m = new Chart(canvas, {
+          ╵          [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'resumenStockMensual' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.html:125:31:
+[37m      125 │ ...puedeVerInventario && [32mresumenStockMensual[37m?.stock_mensual?.leng...
+          ╵                          [32m~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component DashboardComponent.
+
+    src/app/features/dashboard/dashboard.component.ts:30:15:
+[37m      30 │   templateUrl: [32m'./dashboard.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'renderMasVendidosChart' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:50:18:
+[37m      50 │     if (ref) this.[32mrenderMasVendidosChart[37m();
+         ╵                   [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:211:13:
+[37m      211 │     if (this.[32mchartStock[37m) { this.chartStock.destroy(); this.chartS...
+          ╵              [32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:211:32:
+[37m      211 │ ... (this.chartStock) { this.[32mchartStock[37m.destroy(); this.chartStoc...
+          ╵                              [32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:211:59:
+[37m      211 │ ...hartStock) { this.chartStock.destroy(); this.[32mchartStock[37m = null; }
+          ╵                                                 [32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'resumenStockMensual' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:213:30:
+[37m      213 │ ...nst stockMensual = this.[32mresumenStockMensual[37m?.stock_mensual ?? [];
+          ╵                            [32m~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'resumenStockMensual' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:220:25:
+[37m      220 │     const minimo  = this.[32mresumenStockMensual[37m?.minimo_total ?? 0;
+          ╵                          [32m~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'chartStock' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.ts:222:9:
+[37m      222 │     this.[32mchartStock[37m = new Chart(canvas, {
+          ╵          [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'resumenStockMensual' does not exist on type 'DashboardComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/dashboard/dashboard.component.html:125:31:
+[37m      125 │ ...puedeVerInventario && [32mresumenStockMensual[37m?.stock_mensual?.leng...
+          ╵                          [32m~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component DashboardComponent.
+
+    src/app/features/dashboard/dashboard.component.ts:30:15:
+[37m      30 │   templateUrl: [32m'./dashboard.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m

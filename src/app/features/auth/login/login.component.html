@@ -1,0 +1,129 @@
+<div class="login-wrapper">
+
+  <!-- ── LEFT PANEL ── -->
+  <div class="left-panel">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <div class="left-content">
+      <img src="assets/images/LogoComercialFin.png" alt="Comercial Chemical" class="brand-logo" />
+
+      <div class="brand-badge">
+        <span class="dot"></span>
+        Sistema activo · v1.0
+      </div>
+
+      <h1>Gestión inteligente<br><span>de inventarios</span></h1>
+
+      <p>Plataforma empresarial para el control de productos químicos,
+         predicción de demanda y optimización de compras.</p>
+
+      <div class="features-list">
+        <div class="feature-item">
+          <div class="feature-icon">📦</div>
+          <span>Control de inventario en tiempo real</span>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">📈</div>
+          <span>Pronósticos y análisis de demanda</span>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🔔</div>
+          <span>Alertas automáticas de stock crítico</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RIGHT PANEL ── -->
+  <div class="right-panel">
+    <div class="form-card">
+
+      <div class="form-header">
+        <h2>Iniciar sesión</h2>
+        <p>Ingresa tus credenciales para continuar</p>
+      </div>
+
+      <!-- Error -->
+      @if (errorMessage) {
+        <div class="error-box">
+          <mat-icon class="err-icon">error_outline</mat-icon>
+          {{ errorMessage }}
+        </div>
+      }
+
+      <form [formGroup]="loginForm" (ngSubmit)="submit()">
+
+        <!-- Correo -->
+        <div class="input-group">
+          <label for="correo">Correo electrónico</label>
+          <div class="input-wrapper">
+            <mat-icon class="input-icon">mail_outline</mat-icon>
+            <input id="correo" type="email" formControlName="correo"
+                   placeholder="usuario@empresa.com" autocomplete="email" />
+          </div>
+          @if (emailControl.touched && emailControl.invalid) {
+            <div class="field-error">
+              @if (emailControl.errors?.['required']) { El correo es obligatorio }
+              @if (emailControl.errors?.['email']) { Formato de correo inválido }
+            </div>
+          }
+        </div>
+
+        <!-- Contraseña -->
+        <div class="input-group">
+          <label for="contrasena">Contraseña</label>
+          <div class="input-wrapper">
+            <mat-icon class="input-icon">lock_outline</mat-icon>
+            <input id="contrasena" [type]="hidePassword ? 'password' : 'text'"
+                   formControlName="contrasena" placeholder="••••••••"
+                   autocomplete="current-password" />
+            <button type="button" class="toggle-btn" (click)="hidePassword = !hidePassword"
+                    [attr.aria-label]="hidePassword ? 'Mostrar contraseña' : 'Ocultar contraseña'">
+              <mat-icon>{{ hidePassword ? 'visibility' : 'visibility_off' }}</mat-icon>
+            </button>
+          </div>
+          @if (passwordControl.touched && passwordControl.invalid) {
+            <div class="field-error">
+              @if (passwordControl.errors?.['required']) { La contraseña es obligatoria }
+              @if (passwordControl.errors?.['minlength']) { Mínimo 6 caracteres }
+            </div>
+          }
+        </div>
+
+        <!-- Opciones -->
+        <div class="options-row">
+          <label class="remember-label">
+            <input type="checkbox" formControlName="remember" />
+            Recordarme
+          </label>
+          <a class="forgot-link">¿Olvidaste tu contraseña?</a>
+        </div>
+
+        <!-- Botón -->
+        <button type="submit" class="submit-btn" [disabled]="loginForm.invalid || isLoading">
+          @if (!isLoading) {
+            <mat-icon style="font-size:18px;width:18px;height:18px;">login</mat-icon>
+            Ingresar
+          } @else {
+            Ingresando...
+          }
+        </button>
+
+      </form>
+
+      <!-- Loading overlay -->
+      @if (isLoading) {
+        <div class="loading-overlay">
+          <div class="loader-content">
+            <div class="spinner"></div>
+            <p>Verificando credenciales...</p>
+          </div>
+        </div>
+      }
+
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,405 @@
+/* price-calculator.component.css
+   Grid-based table layout, inputs alineados y paginador integrado
+   Incluye FIX GLOBAL: plantilla de columnas única y alineada
+*/
+
+/* Contenedor principal */
+.page-card {
+  margin: 18px;
+  border-radius: 8px;
+  overflow: visible;
+}
+
+/* botón azul tipo Material (puedes cambiar los colores hex si quieres otra tonalidad) */
+.btn-guardar-todas.mat-flat-button {
+  background-color: #1976d2 !important; /* azul principal */
+  color: #ffffff !important;            /* texto blanco */
+  box-shadow: 0 2px 4px rgba(25,118,210,0.22) !important;
+  transition: background-color 160ms ease, box-shadow 160ms ease, transform 120ms ease;
+}
+
+/* hover / focus */
+.btn-guardar-todas.mat-flat-button:hover,
+.btn-guardar-todas.mat-flat-button:focus {
+  background-color: #1565c0 !important; /* azul más oscuro al pasar */
+  box-shadow: 0 4px 10px rgba(21,101,192,0.24) !important;
+  transform: translateY(-1px);
+}
+
+/* estado activo / mousedown */
+.btn-guardar-todas.mat-flat-button:active {
+  background-color: #0d47a1 !important;
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(13,71,161,0.24) !important;
+}
+
+/* estado deshabilitado */
+.btn-guardar-todas.mat-flat-button[disabled],
+.btn-guardar-todas.mat-flat-button.mat-button-disabled {
+  background-color: #90caf9 !important; /* tono claro para disabled */
+  color: rgba(255,255,255,0.7) !important;
+  box-shadow: none !important;
+  opacity: 1; /* Angular Material baja la opacidad por defecto; mantenemos control */
+  cursor: default;
+}
+
+/* icono dentro del botón */
+.btn-guardar-todas.mat-flat-button mat-icon {
+  vertical-align: middle;
+  margin-right: 8px;
+  color: inherit; /* mantén el color del texto */
+}
+/* Header (usado en el mat-card) */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 18px;
+}
+
+/* Icono en el header */
+.page-icon mat-icon {
+  font-size: 20px;
+  color: #c62828;
+}
+
+/* Título */
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #1a237e;
+  letter-spacing: -0.3px;
+}
+.page-title mat-icon { font-size: 26px; width: 26px; height: 26px; color: #3949ab; }
+
+/* Subtitulo */
+.page-subtitle {
+  font-size: 12px;
+  color: #666;
+}
+
+/* filtros */
+.filters-row {
+  display:flex;
+  gap:12px;
+  align-items:center;
+  margin: 10px 0 18px 0;
+  flex-wrap:wrap;
+}
+
+/* wrapper de la "tabla" para permitir scroll horizontal */
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  border-top: 1px solid rgba(0,0,0,0.06);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  box-sizing: border-box;
+}
+
+/* GRID: tabla interna */
+.grid-table {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Celdas generales (body) - por defecto no envuelven */
+.cell {
+  padding: 10px 6px;
+  font-size: 14px;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+/* Descripción permite wrap */
+.cell-desc {
+  white-space: normal;
+  line-height: 1.3;
+  word-break: break-word;
+  font-size: 14px;
+  color: #36404a;
+}
+
+/* Inputs dentro de las celdas: que ocupen todo el ancho de la celda */
+.cell-input {
+  display:flex;
+  align-items:center;
+}
+
+/* Forzamos que mat-form-field ocupe todo el ancho de la celda */
+.cell-input .mat-form-field {
+  width:100%;
+  margin:0;
+  box-sizing:border-box;
+}
+
+/* ajustar infix para evitar overflow */
+.cell-input .mat-form-field .mat-form-field-infix {
+  padding: 0 6px;
+  box-sizing: border-box;
+}
+
+/* altura del input para consistencia */
+.cell-input .mat-input-element {
+  height: 38px !important;
+  line-height: 38px !important;
+  padding: 6px 8px !important;
+  box-sizing: border-box;
+  font-size: 14px;
+  text-align: right; /* números alineados a derecha */
+}
+
+/* readonly / disabled estilo tipo texto */
+.cell-input input[readonly].mat-input-element,
+.cell-input input[disabled].mat-input-element {
+  background: transparent !important;
+  border: none !important;
+  padding: 6px 8px !important;
+  color: #333 !important;
+  text-align: right !important;
+}
+
+/* Acciones: alineadas a la derecha y con gap */
+.cell-actions {
+  display:flex;
+  gap:8px;
+  align-items:center;
+  justify-content:flex-end;
+  min-width:120px;
+}
+
+/* Iconos, botones en la columna acciones */
+.cell-actions .mat-icon-button {
+  min-width:36px;
+  height:36px;
+}
+
+/* Hover de fila */
+.grid-row:hover {
+  background: #fffaf0;
+}
+
+/* Paginador wrapper */
+.pagination-wrapper {
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  padding: 12px 8px;
+}
+
+/* Estética del mat-paginator y select superior */
+.mat-paginator {
+  background: transparent;
+}
+.mat-form-field.filter-item {
+  min-width: 140px;
+}
+
+/* asegurar outline visible en mat-form-field */
+.mat-form-field-appearance-outline .mat-form-field-outline {
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  height: calc(100% - 6px) !important;
+  pointer-events: none;
+}
+
+/* -------------------------------------------------------
+   --- FIX GLOBAL: plantilla de columnas única y alineada ---
+   ------------------------------------------------------- */
+
+/* variable con la plantilla de columnas (modifica anchos si necesitas) */
+:root, .page-card { 
+  --grid-template:
+    90px
+    minmax(260px, 1.6fr)
+    80px
+    120px
+    110px
+    130px
+    120px
+    90px
+    90px
+    130px
+    160px
+    180px; /* 🔥 antes 140px → ahora más espacio */
+}
+
+/* wrapper que asegura mínimo ancho total (evita compresión extrema) */
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+}
+
+/* aseguramos un min-width razonable para la tabla interna */
+.grid-table {
+  min-width: 1450px; /* suma aproximada de columnas; ajústalo si cambias anchos */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Header y filas usan la misma plantilla de columnas (única fuente de verdad) */
+.grid-columns {
+  display: grid;
+  grid-template-columns: var(--grid-template);
+  column-gap: 18px;
+  align-items: center;
+  padding: 12px 18px;
+  box-sizing: border-box;
+}
+
+/* Header (títulos) */
+.grid-header {
+  font-weight: 600;
+  color: #333;
+  font-size: 13px;
+  line-height: 1.15;
+  background: rgba(250,250,252,0.85);
+  /* permitir wrap solo en header (para ver títulos completos) */
+  align-items: start;
+  min-height: 56px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+/* Header cells: permitir múltiples líneas y evitar ellipsis */
+.grid-header .cell {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  word-break: break-word;
+  padding: 6px 6px;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+/* Filas */
+.grid-row {
+  display: grid;
+  grid-template-columns: var(--grid-template); /* misma plantilla */
+  gap: 18px;
+  align-items: center;
+  padding: 10px 18px;
+  box-sizing: border-box;
+  background: #fff;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  min-height: 78px;
+}
+
+/* Mantener cells del body en single-line (evita que inputs salgan) */
+.grid-row .cell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 10px 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+/* descripción: permite wrap pero controlado (ya recibe más espacio) */
+.cell-desc {
+  white-space: normal;
+  line-height: 1.25;
+  word-break: break-word;
+}
+
+/* Inputs: asegurar que ocupen la celda y no la desborden */
+.cell-input { display:flex; align-items:center; }
+.cell-input .mat-form-field { width:100%; margin:0; box-sizing:border-box; }
+.cell-input .mat-form-field .mat-form-field-infix { padding:0 6px; box-sizing:border-box; }
+.cell-input .mat-input-element {
+  height: 38px !important;
+  line-height: 38px !important;
+  padding: 6px 8px !important;
+  box-sizing: border-box;
+  font-size: 14px;
+  text-align: right;
+}
+
+/* Acciones: aseguramos ancho mínimo y alineación */
+.cell-actions { 
+  display: flex; 
+  align-items: center; 
+  justify-content: flex-end; 
+  gap: 6px;
+  min-width: 160px;
+  white-space: nowrap; /* 🔥 evita que se rompa en dos líneas */
+}
+.cell-actions button[mat-stroked-button] {
+  height: 32px;
+  padding: 0 10px;
+  font-size: 13px;
+  line-height: 32px;
+  border-radius: 6px;
+}
+.cell-actions button mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  margin-right: 4px;
+}
+/* Alineaciones y cajas coherentes */
+.grid-header .cell, .grid-row .cell { box-sizing: border-box; }
+
+/* Evitar duplicados: sobrescribe otras definiciones conflictivas */
+.grid-columns, .grid-row, .grid-header, .table-wrapper { -webkit-font-smoothing:antialiased; }
+
+/* Responsive: reducir un poco anchos y gaps en pantallas pequeñas */
+@media (max-width: 1200px) {
+  :root, .page-card { --grid-template:
+    80px minmax(200px, 1.3fr) 70px 110px 100px 120px 110px 80px 80px 110px 140px 120px; }
+  .grid-table { min-width: 1200px; }
+  .grid-row { min-height: 70px; padding:8px 10px; }
+  .grid-header { min-height: 48px; font-size:12px; }
+  .cell { font-size:13px; padding: 8px 6px; }
+}
+
+/* Mobile: permitir scroll horizontal en lugar de romper columnas */
+@media (max-width: 800px) {
+  .grid-table { min-width: 1100px; }
+  :root, .page-card { --grid-template:
+    70px minmax(160px, 1fr) 60px 100px repeat(8, 110px); }
+  .filters-row { gap:8px; }
+}
+
+/* Si aún hay reglas conflictivas de mat-form-field/outline, las normalizamos */
+.mat-form-field-appearance-outline .mat-form-field-outline {
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  height: calc(100% - 6px) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Pequeño polish: que el header tenga fondo ligeramente distinto      */
+/* (ya aplicado sobre .grid-header arriba)                             */
+/* ------------------------------------------------------------------ */
+
+/* Asegura que el mat-card no corte los outline de inputs */
+mat-card, .page-card { overflow: visible; }
+
+/* Optional: ajustar iconos de sección / títulos reutilizables */
+.section-header {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin: 8px 0 18px 0;
+}
+.section-header .section-icon {
+  width:36px; height:36px; display:flex; align-items:center; justify-content:center;
+  border-radius:6px; color:#2b2f4a;
+}
+.section-title { font-size:20px; font-weight:600; color:#2b2f4a; margin:0; }
+
+/* Normalize fonts & rendering */
+body, .page-card, .grid-table {
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}

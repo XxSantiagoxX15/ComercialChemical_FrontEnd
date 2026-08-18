@@ -1,0 +1,389 @@
+/* ══════════════════════════════════════════════════════════════════
+   DASHBOARD  ·  Comercial Chemical S.A.S.
+══════════════════════════════════════════════════════════════════ */
+.dashboard-container {
+  max-width: 1280px;
+}
+
+/* ── Page header ───────────────────────────────────────────────── */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.75rem;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #1a237e;
+  letter-spacing: -0.3px;
+}
+.page-title mat-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  color: #3949ab;
+}
+
+/* ── KPI Grid ──────────────────────────────────────────────────── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1.1rem;
+  margin-bottom: 1.5rem;
+}
+
+.kpi-card {
+  border-radius: 16px !important;
+  overflow: hidden;
+  border: none !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: default;
+}
+.kpi-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 32px rgba(0,0,0,0.11), 0 2px 8px rgba(0,0,0,0.05) !important;
+}
+
+/* Color themes */
+.kpi-blue  { background: linear-gradient(135deg, #1a237e 0%, #283593 100%) !important; }
+.kpi-red   { background: linear-gradient(135deg, #b71c1c 0%, #c62828 100%) !important; }
+.kpi-orange{ background: linear-gradient(135deg, #bf360c 0%, #e65100 100%) !important; }
+.kpi-green { background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%) !important; }
+
+.kpi-card mat-card-content {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 22px 20px 10px !important;
+}
+
+.kpi-icon-wrap {
+  width: 58px; height: 58px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.kpi-icon-wrap mat-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  color: rgba(255,255,255,0.95);
+}
+
+.kpi-info { flex: 1; }
+
+.kpi-value {
+  font-size: 2.2rem;
+  font-weight: 800;
+  line-height: 1;
+  color: #ffffff;
+  letter-spacing: -1px;
+}
+
+.kpi-label {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.72);
+  margin-top: 5px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+}
+
+.kpi-card mat-card-actions {
+  padding: 4px 20px 14px !important;
+}
+.kpi-card mat-card-actions a {
+  color: rgba(255,255,255,0.75) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.2px;
+  transition: color 0.15s;
+}
+.kpi-card mat-card-actions a:hover { color: #fff !important; }
+
+/* ── Alerts card ───────────────────────────────────────────────── */
+.alerts-card {
+  border-radius: 16px !important;
+  overflow: hidden;
+}
+
+.alerts-card mat-card-header {
+  padding: 20px 20px 0 !important;
+  align-items: center;
+}
+
+.alerts-card mat-card-title {
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  color: #1a237e !important;
+}
+
+.alerts-card mat-card-subtitle {
+  font-size: 0.8rem !important;
+  color: #6b7280 !important;
+}
+
+/* Empty state */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2.5rem 2rem;
+  color: #4caf50;
+  gap: 10px;
+  text-align: center;
+}
+.empty-state mat-icon {
+  font-size: 52px;
+  width: 52px;
+  height: 52px;
+  opacity: 0.7;
+}
+.empty-state p {
+  font-size: 0.9rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* Alerts list */
+.alerts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 0 4px;
+}
+
+.alert-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #fffbf0;
+  border-radius: 10px;
+  border-left: 4px solid #f59e0b;
+  transition: background 0.15s;
+}
+.alert-item:hover { background: #fff8e1; }
+
+.alert-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.alert-code {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #1a237e;
+}
+
+.alert-desc {
+  font-size: 0.8rem;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.alert-stock {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.stock-value {
+  font-size: 0.82rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.card-footer {
+  padding: 10px 0 4px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ── Gráficas (stock crítico / línea de tiempo) ───────────────────── */
+.chart-card {
+  border-radius: 16px !important;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.chart-card mat-card-header {
+  padding: 20px 20px 0 !important;
+  align-items: center;
+}
+
+.chart-card mat-card-title {
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  color: #1a237e !important;
+}
+
+.chart-card mat-card-subtitle {
+  font-size: 0.8rem !important;
+  color: #6b7280 !important;
+}
+
+.hint-warn { color: #e65100; font-weight: 500; }
+
+.chart-wrap {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  padding: 12px 4px 4px;
+}
+
+.chart-wrap canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* ── Widgets: Kits Producibles / Recomendaciones ──────────────────── */
+.widgets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 1.1rem;
+  margin-top: 1.5rem;
+}
+
+.widget-card {
+  border-radius: 16px !important;
+  overflow: hidden;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .kpi-grid, .widgets-grid { grid-template-columns: 1fr; }
+  .chart-wrap { height: 260px; }
+}
+
+.widget-card mat-card-header {
+  padding: 20px 20px 0 !important;
+  align-items: center;
+}
+
+.widget-card mat-card-title {
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  color: #1a237e !important;
+}
+
+.widget-card mat-card-subtitle {
+  font-size: 0.8rem !important;
+  color: #6b7280 !important;
+}
+
+.widget-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 0 4px;
+}
+
+.widget-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: #f5f7ff;
+  border-radius: 10px;
+  gap: 10px;
+}
+
+.widget-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.widget-item-code {
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: #1a237e;
+}
+
+.widget-item-desc {
+  font-size: 0.78rem;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.widget-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.empty-state.small {
+  padding: 1.5rem;
+}
+.empty-state.small mat-icon {
+  font-size: 36px;
+  width: 36px;
+  height: 36px;
+}
+
+/* Chips de prioridad/nivel */
+.chip-critico { background: #ffcdd2 !important; color: #b71c1c !important; }
+.chip-alto    { background: #ffe0b2 !important; color: #e65100 !important; }
+.chip-medio   { background: #fff9c4 !important; color: #f57f17 !important; }
+.chip-bajo    { background: #c8e6c9 !important; color: #1b5e20 !important; }
+
+/* ── Error card ────────────────────────────────────────────────── */
+.error-card mat-card-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 1.25rem !important;
+  color: #c62828;
+  font-weight: 500;
+}
+
+/* ── Refresh button ────────────────────────────────────────────── */
+.refresh-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 120px;
+  justify-content: center;
+}
+
+.refresh-btn[disabled] {
+  opacity: 0.7;
+}
+
+.btn-spinner {
+  display: inline-flex !important;
+  flex-shrink: 0;
+}
+
+/* Spin animation on the refresh icon when NOT loading (hover) */
+.refresh-btn:not([disabled]):hover mat-icon {
+  animation: spin-once 0.5s ease;
+}
+
+@keyframes spin-once {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}

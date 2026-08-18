@@ -1,0 +1,178 @@
+.page-container { max-width: 1200px; }
+
+.page-header {
+  display: flex; align-items: center;
+  justify-content: space-between; margin-bottom: 1.5rem;
+}
+
+.page-title {
+  display: flex; align-items: center; gap: 8px;
+  margin: 0; font-size: 1.5rem; font-weight: 600; color: #1a237e;
+}
+
+.page-header-actions {
+  display: flex; align-items: center; gap: 8px;
+}
+
+.tab-icon { font-size: 18px; width: 18px; height: 18px; margin-right: 6px; vertical-align: middle; }
+
+.tab-content {
+  padding: 1.5rem 0;
+  display: flex; flex-direction: column; gap: 1rem;
+}
+
+/* ── Formulario ──────────────────────────────────────────────────────── */
+.forecast-form { display: flex; flex-direction: column; gap: 16px; padding-top: 8px; }
+.forecast-actions { display: flex; justify-content: flex-end; }
+.forecast-btn { padding: 0 28px !important; height: 44px !important; font-size: 0.95rem !important; font-weight: 600 !important; }
+.full { width: 100%; }
+
+/* ── Selector de horizonte ───────────────────────────────────────────── */
+.horizonte-selector { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.horizonte-label { font-size: 0.85rem; color: #555; font-weight: 500; }
+.historial-hint { font-size: 0.78rem; color: #888; font-style: italic; }
+
+/* ── Gráficas ────────────────────────────────────────────────────────── */
+.chart-card { border-radius: 12px !important; }
+
+.chart-wrap {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  padding: 8px 0;
+}
+
+.chart-horizontal { height: 380px; }
+
+/* ── Estadísticas ────────────────────────────────────────────────────── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 700px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.stat-card { background: #f0f2ff; border-radius: 10px; padding: 14px; text-align: center; }
+.stat-value { font-size: 1.4rem; font-weight: 700; color: #1a237e; }
+.stat-label { font-size: 0.75rem; color: #666; margin-top: 4px; }
+
+.tendencia-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 0.9rem; font-weight: 600; padding: 2px 8px; border-radius: 12px;
+}
+.tendencia-badge.creciente   { background: #e8f5e9; color: #2e7d32; }
+.tendencia-badge.decreciente { background: #ffebee; color: #c62828; }
+
+/* ── Tabla resultados ────────────────────────────────────────────────── */
+.results-table td { padding-top: 10px; padding-bottom: 10px; }
+
+.demand-value { font-size: 1rem; font-weight: 600; color: #1a237e; }
+.demand-value.high { color: #e65100; }
+
+.forecast-bar-wrap { display: flex; align-items: center; gap: 8px; min-width: 140px; }
+.forecast-bar { height: 8px; border-radius: 4px; background: #3949ab; min-width: 4px; transition: width 0.3s; }
+.forecast-bar.high { background: #e65100; }
+.bar-pct { font-size: 0.75rem; color: #888; white-space: nowrap; }
+.bar-sample { display: inline-block; width: 24px; height: 8px; border-radius: 4px; background: #3949ab; vertical-align: middle; }
+.bar-sample.high { background: #e65100; }
+
+.stock-hint { display: flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 0.82rem; color: #555; }
+.stock-hint mat-icon { font-size: 16px; width: 16px; height: 16px; color: #3949ab; }
+
+/* ── Ranking ─────────────────────────────────────────────────────────── */
+.rank-badge { display: inline-block; font-weight: 700; font-size: 0.85rem; color: #555; min-width: 28px; }
+.rank-badge.top3 { color: #e65100; }
+
+/* ── Filtro recomendaciones ──────────────────────────────────────────── */
+.filter-card { border-radius: 12px !important; }
+.filter-card mat-card-content { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding-top: 12px !important; }
+.filter-field { flex: 1; min-width: 260px; }
+.filter-count { font-size: 0.82rem; color: #666; white-space: nowrap; }
+
+/* ── Chips prioridad ─────────────────────────────────────────────────── */
+.prioridad-chip { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; }
+.prioridad-critico { background: #ffebee; color: #c62828; }
+.prioridad-alto    { background: #fff3e0; color: #e65100; }
+.prioridad-medio   { background: #fffde7; color: #f57f17; }
+.prioridad-bajo    { background: #e8f5e9; color: #2e7d32; }
+
+/* ── Chip exceso de inventario ───────────────────────────────────────── */
+.exceso-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600;
+  white-space: nowrap; background: #e3f2fd; color: #1565c0;
+}
+.exceso-chip mat-icon { font-size: 16px; width: 16px; height: 16px; }
+.exceso-count-badge {
+  display: inline-block; margin-left: 6px; padding: 1px 7px;
+  border-radius: 10px; font-size: 0.72rem; font-weight: 700;
+  background: #1565c0; color: #fff;
+}
+
+/* ── Comparar periodos ──────────────────────────────────────────────── */
+.preset-buttons { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+
+.periodos-grid {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+}
+.periodo-col { display: flex; flex-direction: column; gap: 4px; min-width: 220px; }
+.periodo-label { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; }
+.periodo-label.periodo-1 { color: #3949ab; }
+.periodo-label.periodo-2 { color: #757575; }
+.vs-icon { color: #bbb; margin-top: 20px; }
+
+.comparacion-summary {
+  display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: stretch;
+}
+@media (max-width: 700px) { .comparacion-summary { grid-template-columns: 1fr; } }
+
+.summary-card {
+  border-radius: 12px !important; padding: 16px; text-align: center;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+}
+.summary-label { font-size: 0.78rem; font-weight: 700; color: #888; text-transform: uppercase; }
+.summary-dates { font-size: 0.75rem; color: #999; margin-bottom: 4px; }
+.summary-value { font-size: 1.5rem; font-weight: 700; color: #1a237e; }
+.summary-sub { font-size: 0.8rem; color: #666; }
+
+.variacion-card { min-width: 160px; }
+.variacion-card mat-icon { font-size: 26px; width: 26px; height: 26px; }
+.variacion-card.positiva { background: #e8f5e9; }
+.variacion-card.positiva mat-icon, .variacion-card.positiva .summary-value { color: #2e7d32; }
+.variacion-card.negativa { background: #ffebee; }
+.variacion-card.negativa mat-icon, .variacion-card.negativa .summary-value { color: #c62828; }
+
+.variacion-chip {
+  display: inline-flex; align-items: center; gap: 2px;
+  padding: 3px 8px; border-radius: 10px; font-size: 0.8rem; font-weight: 600; white-space: nowrap;
+}
+.variacion-chip.positiva { background: #e8f5e9; color: #2e7d32; }
+.variacion-chip.negativa { background: #ffebee; color: #c62828; }
+/* ── Reporte de necesidades ────────────────────────────────────────── */
+.reporte-selector { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.reporte-selector mat-form-field { min-width: 220px; }
+.reporte-summary { grid-template-columns: 1fr 1fr; }
+/* ── Exportar (PDF/Excel) ──────────────────────────────────────────── */
+mat-card-header { flex-wrap: wrap; }
+.header-spacer { flex: 1 1 auto; }
+.export-actions { display: flex; gap: 8px; align-self: center; }
+/* ── Error ───────────────────────────────────────────────────────────── */
+.error-calc {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: #fff3e0; color: #e65100;
+  border-radius: 8px; padding: 12px 16px;
+  border-left: 4px solid #e65100;
+}
+.error-calc mat-icon { margin-top: 2px; flex-shrink: 0; }
+
+/* ── Sin datos ───────────────────────────────────────────────────────── */
+.no-data-msg { text-align: center; padding: 3rem; color: #999; }
+.no-data-msg mat-icon { font-size: 48px; width: 48px; height: 48px; display: block; margin: 0 auto 12px; color: #ccc; }
+
+/* ── Utilidades ──────────────────────────────────────────────────────── */
+.loading-center { display: flex; justify-content: center; padding: 3rem; }
+.full-width { width: 100%; }
+.table-wrapper { overflow-x: auto; }
+.table-row:hover { background: #f5f7ff; }
+.text-muted { color: #888; }

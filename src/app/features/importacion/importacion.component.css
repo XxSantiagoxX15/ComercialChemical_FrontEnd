@@ -1,0 +1,165 @@
+.page-container { max-width: 1000px; }
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a237e;
+}
+
+.tipo-card { margin-bottom: 1rem; border-radius: 12px !important; }
+
+.tipo-buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.tipo-desc {
+  margin: 12px 0 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.upload-card { margin-bottom: 1rem; border-radius: 12px !important; }
+
+.drop-zone {
+  border: 2px dashed #90caf9;
+  border-radius: 12px;
+  padding: 3rem 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  background: #f8f9ff;
+}
+
+.drop-zone:hover, .drop-zone.has-file {
+  border-color: #1a237e;
+  background: #e8eaf6;
+}
+
+.drop-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  color: #90caf9;
+}
+
+.drop-text {
+  font-size: 1.1rem;
+  color: #444;
+  margin: 8px 0;
+}
+
+.drop-hint {
+  font-size: 0.8rem;
+  color: #999;
+  margin-top: 8px;
+}
+
+.file-label {
+  cursor: pointer;
+}
+
+.select-btn {
+  display: inline-block;
+  padding: 8px 20px;
+  background: #1a237e;
+  color: white;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.select-btn:hover { background: #283593; }
+
+.file-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  color: #1a237e;
+}
+
+.file-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a237e;
+  margin: 8px 0 4px;
+}
+
+.file-size {
+  font-size: 0.8rem;
+  color: #888;
+  margin: 0 0 16px;
+}
+
+.file-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.upload-result {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.result-ok {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.result-error {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.upload-result mat-icon { margin-top: 2px; }
+
+.loading-center {
+  display: flex;
+  justify-content: center;
+  padding: 3rem;
+}
+
+.table-wrapper { overflow-x: auto; }
+.full-width { width: 100%; }
+
+.no-data {
+  text-align: center;
+  padding: 2rem;
+  color: #999;
+}
+
+.chip-ok { background-color: #e8f5e9 !important; color: #2e7d32 !important; }
+.chip-warn { background-color: #fff9c4 !important; color: #f57f17 !important; }
+.chip-error { background-color: #ffebee !important; color: #c62828 !important; }
+
+/* Badge de estado en historial */
+.estado-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.estado-badge.chip-ok    { background: #e8f5e9; color: #2e7d32; }
+.estado-badge.chip-warn  { background: #fff9c4; color: #f57f17; }
+.estado-badge.chip-error { background: #ffebee; color: #c62828; }

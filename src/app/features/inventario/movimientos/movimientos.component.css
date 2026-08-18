@@ -1,0 +1,50 @@
+/* ── Movimientos ───────────────────────────────────────────────── */
+.page-container { max-width: 1280px; }
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #1a237e;
+  letter-spacing: -0.3px;
+}
+.page-title mat-icon { font-size: 26px; width: 26px; height: 26px; color: #3949ab; }
+
+.form-panel { margin-bottom: 1rem; }
+.form-panel mat-panel-title { display: flex; align-items: center; gap: 8px; }
+
+.mov-form { display: flex; flex-direction: column; gap: 4px; padding: 8px 0; }
+
+.form-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.flex1 { flex: 1; min-width: 140px; }
+.flex2 { flex: 2; min-width: 200px; }
+.full  { width: 100%; }
+
+.form-actions { display: flex; justify-content: flex-end; padding-top: 4px; }
+
+.filter-card { margin-bottom: 1rem; }
+.filter-row  { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+
+.table-wrapper { overflow-x: auto; }
+.full-width { width: 100%; }
+
+.no-data {
+  text-align: center;
+  padding: 3rem;
+  color: #9ca3af;
+  font-size: 0.9rem;
+}
+
+.stock-badge { font-size: 0.75rem; color: #9ca3af; margin-left: 8px; }

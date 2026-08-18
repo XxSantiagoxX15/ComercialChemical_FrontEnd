@@ -1,0 +1,59 @@
+.articulo-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 8px;
+  min-width: 500px;
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.full { width: 100%; }
+.half { flex: 1; }
+.third { flex: 1; }
+
+.form-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #ffebee;
+  border-radius: 6px;
+  color: #c62828;
+  margin-bottom: 12px;
+}
+
+h2[mat-dialog-title] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.6);
+  margin: 4px 0 8px;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+}
+
+.ficha-seguridad-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 4px;
+}
+
+.ficha-seguridad-label {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.ficha-seguridad-hint {
+  font-size: 12px;
+  color: #3949ab;
+}

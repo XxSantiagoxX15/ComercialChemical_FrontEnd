@@ -1,0 +1,60 @@
+<h2 mat-dialog-title>
+  <mat-icon>{{ isEdit ? 'edit' : 'add_circle' }}</mat-icon>
+  {{ isEdit ? 'Editar Proveedor' : 'Nuevo Proveedor' }}
+</h2>
+
+<mat-dialog-content>
+  @if (error) {
+    <div class="form-error">
+      <mat-icon>error</mat-icon>
+      {{ error }}
+    </div>
+  }
+
+  <form [formGroup]="form" class="proveedor-form">
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Nombre *</mat-label>
+      <input matInput formControlName="nombre" placeholder="Razón social del proveedor">
+      @if (form.get('nombre')?.hasError('required') && form.get('nombre')?.touched) {
+        <mat-error>El nombre es requerido</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="half">
+        <mat-label>NIT</mat-label>
+        <input matInput formControlName="nit" placeholder="900123456-1">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="half">
+        <mat-label>Contacto</mat-label>
+        <input matInput formControlName="contacto" placeholder="Nombre del contacto">
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="half">
+        <mat-label>Teléfono</mat-label>
+        <input matInput formControlName="telefono">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="half">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="email">
+        @if (form.get('email')?.hasError('email') && form.get('email')?.touched) {
+          <mat-error>Email inválido</mat-error>
+        }
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancelar</button>
+  <button mat-raised-button color="primary" (click)="guardar()" [disabled]="saving">
+    @if (saving) {
+      <mat-spinner diameter="20" style="display:inline-block;margin-right:8px;"></mat-spinner>
+    }
+    {{ isEdit ? 'Actualizar' : 'Crear' }}
+  </button>
+</mat-dialog-actions>

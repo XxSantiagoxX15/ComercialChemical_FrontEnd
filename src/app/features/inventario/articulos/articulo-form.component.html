@@ -1,0 +1,130 @@
+<h2 mat-dialog-title>
+  <mat-icon>{{ isEdit ? 'edit' : 'add_circle' }}</mat-icon>
+  {{ isEdit ? 'Editar Artículo' : 'Nuevo Artículo' }}
+</h2>
+
+<mat-dialog-content>
+  @if (error) {
+    <div class="form-error">
+      <mat-icon>error</mat-icon>
+      {{ error }}
+    </div>
+  }
+
+  <form [formGroup]="form" class="articulo-form">
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="half">
+        <mat-label>Código *</mat-label>
+        <input matInput formControlName="codigo" placeholder="Ej: ART-001">
+        @if (form.get('codigo')?.hasError('required') && form.get('codigo')?.touched) {
+          <mat-error>El código es requerido</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="half">
+        <mat-label>Unidad de Medida *</mat-label>
+        <mat-select formControlName="unidad_medida">
+          <mat-option value="unidad">Unidad</mat-option>
+          <mat-option value="kg">Kilogramo</mat-option>
+          <mat-option value="litro">Litro</mat-option>
+          <mat-option value="caja">Caja</mat-option>
+          <mat-option value="paquete">Paquete</mat-option>
+          <mat-option value="metro">Metro</mat-option>
+        </mat-select>
+        @if (form.get('unidad_medida')?.hasError('required') && form.get('unidad_medida')?.touched) {
+          <mat-error>La unidad es requerida</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Descripción *</mat-label>
+      <input matInput formControlName="descripcion" placeholder="Descripción del artículo">
+      @if (form.get('descripcion')?.hasError('required') && form.get('descripcion')?.touched) {
+        <mat-error>La descripción es requerida</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="half">
+        <mat-label>Categoría</mat-label>
+        <input matInput formControlName="categoria" placeholder="Ej: Químicos, Reactivos...">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="half">
+        <mat-label>Tipo</mat-label>
+        <mat-select formControlName="tipo_producto">
+          @for (opt of tiposProducto; track opt.value) {
+            <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+          }
+        </mat-select>
+        <mat-hint>Un kit se arma a partir de otros artículos del catálogo</mat-hint>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="third">
+        <mat-label>Stock Mínimo</mat-label>
+        <input matInput type="number" formControlName="stock_minimo" min="0">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="third">
+        <mat-label>Stock Máximo</mat-label>
+        <input matInput type="number" formControlName="stock_maximo" min="0">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="third">
+        <mat-label>Tiempo Reposición (días)</mat-label>
+        <input matInput type="number" formControlName="tiempo_reposicion_dias" min="0">
+      </mat-form-field>
+    </div>
+
+    <mat-divider style="margin: 12px 0;"></mat-divider>
+    <h3 class="form-section-title">Seguridad y costos</h3>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="half">
+        <mat-label>Clasificación de Peligro</mat-label>
+        <mat-select formControlName="clasificacion_peligro">
+          @for (opt of clasificacionesPeligro; track opt.value) {
+            <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <div class="half ficha-seguridad-field">
+        <label class="ficha-seguridad-label">Ficha de Seguridad (SDS/MSDS)</label>
+        <input type="file" accept="application/pdf" (change)="onFichaSeguridadSeleccionada($event)">
+        @if (fichaSeguridadFile) {
+          <span class="ficha-seguridad-hint">{{ fichaSeguridadFile.name }}</span>
+        } @else if (fichaSeguridadActualUrl) {
+          <a [href]="fichaSeguridadActualUrl" target="_blank" class="ficha-seguridad-hint">Ver ficha actual</a>
+        }
+      </div>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="half">
+        <mat-label>Costo de Pedido (S)</mat-label>
+        <input matInput type="number" formControlName="costo_pedido" min="0">
+        <mat-hint>Costo fijo de realizar un pedido, para calcular EOQ</mat-hint>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="half">
+        <mat-label>Costo de Mantenimiento Anual (H)</mat-label>
+        <input matInput type="number" formControlName="costo_mantenimiento_anual" min="0">
+        <mat-hint>Costo anual de mantener 1 unidad en inventario</mat-hint>
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancelar</button>
+  <button mat-raised-button color="primary" (click)="guardar()" [disabled]="saving">
+    @if (saving) {
+      <mat-spinner diameter="20" style="display:inline-block;margin-right:8px;"></mat-spinner>
+    }
+    {{ isEdit ? 'Actualizar' : 'Crear' }}
+  </button>
+</mat-dialog-actions>

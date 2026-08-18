@@ -1,0 +1,908 @@
+<div class="page-container">
+
+  <!-- Header -->
+  <div class="page-header">
+    <h1 class="page-title">
+      <mat-icon>auto_graph</mat-icon>
+      Forecasting & Pronósticos
+    </h1>
+    <div class="page-header-actions">
+      <button mat-stroked-button color="primary" (click)="calcularTodosLosPronosticos()"
+              [disabled]="calculandoMasivo" matTooltip="Calcula el pronóstico de todos los artículos con historial de ventas, sin tener que hacerlo uno por uno.">
+        @if (calculandoMasivo) {
+          <mat-spinner diameter="18" style="display:inline-block; margin-right:8px;"></mat-spinner>
+        } @else {
+          <mat-icon>bolt</mat-icon>
+        }
+        Pronóstico masivo
+      </button>
+      <button mat-stroked-button (click)="recargar()"
+              [disabled]="calculando || loadingMasVendidos || loadingRecomendaciones">
+        <mat-icon>refresh</mat-icon> Actualizar
+      </button>
+    </div>
+  </div>
+
+  <mat-tab-group animationDuration="200ms" (selectedTabChange)="onTabChange($event)">
+
+    <!-- ══════════════════════════════════════════════════════════
+         TAB 1 — FORECASTING
+    ══════════════════════════════════════════════════════════ -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">trending_up</mat-icon>
+        Forecasting
+      </ng-template>
+
+      <div class="tab-content">
+
+        <!-- Formulario -->
+        <mat-card class="calc-card">
+          <mat-card-header>
+            <mat-card-title>Generar Pronóstico</mat-card-title>
+            <mat-card-subtitle>Selecciona un artículo para calcular la demanda futura</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="forecast-form">
+              <mat-form-field appearance="outline" class="full">
+                <mat-label>Artículo</mat-label>
+                <mat-icon matPrefix style="margin-right:8px;color:#3949ab">inventory_2</mat-icon>
+                <input matInput [value]="articuloSearch" (input)="onArticuloSearch($event)"
+                       [matAutocomplete]="autoArt"
+                       placeholder="Buscar por código o descripción...">
+                <mat-autocomplete #autoArt="matAutocomplete">
+                  @for (art of articulosFiltrados; track art.id) {
+                    <mat-option [value]="art.codigo + ' - ' + art.descripcion"
+                                (click)="seleccionarArticulo(art)">
+                      <strong>{{ art.codigo }}</strong> — {{ art.descripcion }}
+                      <small style="color:#888;margin-left:8px">Stock: {{ art.stock_actual }}</small>
+                    </mat-option>
+                  }
+                </mat-autocomplete>
+              </mat-form-field>
+
+              <div class="horizonte-selector">
+                <span class="horizonte-label">Horizonte de pronóstico:</span>
+                <mat-button-toggle-group [(ngModel)]="horizonteSeleccionado" [disabled]="!articuloSeleccionado">
+                  @for (h of horizonteOpciones; track h) {
+                    <mat-button-toggle [value]="h" [disabled]="esHorizonteDeshabilitado(h)"
+                        [matTooltip]="esHorizonteDeshabilitado(h) ? ('Este artículo solo tiene ' + historialDisponible + ' mes(es) de historial de ventas') : ''">
+                      {{ h }} meses
+                    </mat-button-toggle>
+                  }
+                </mat-button-toggle-group>
+                @if (articuloSeleccionado && historialDisponible !== null) {
+                  <span class="historial-hint">
+                    @if (historialDisponible > 0) {
+                      Historial disponible: {{ historialDisponible }} mes(es) de ventas
+                    } @else {
+                      Sin historial de ventas — no se puede generar un pronóstico confiable
+                    }
+                  </span>
+                }
+              </div>
+
+              <div class="forecast-actions">
+                <button mat-raised-button color="primary"
+                        (click)="calcular()"
+                        [disabled]="calculando || !articuloSeleccionado"
+                        class="forecast-btn">
+                  @if (calculando) {
+                    <mat-spinner diameter="20"
+                      style="display:inline-block;margin-right:8px;vertical-align:middle;">
+                    </mat-spinner>
+                    Calculando...
+                  } @else {
+                    <ng-container>
+                      <mat-icon>auto_graph</mat-icon>
+                      Generar Pronóstico
+                    </ng-container>
+                  }
+                </button>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Error -->
+        @if (errorCalculo) {
+          <div class="error-calc">
+            <mat-icon>warning_amber</mat-icon>
+            <div>
+              <strong>No se pudo calcular el pronóstico</strong>
+              <div>{{ errorCalculo }}</div>
+            </div>
+          </div>
+        }
+
+        <!-- Estadísticas -->
+        @if (analisis) {
+          <mat-card class="stats-card">
+            <mat-card-header>
+              <mat-card-title>Análisis Estadístico</mat-card-title>
+              <mat-card-subtitle>
+                {{ articuloSeleccionado?.codigo }} — {{ articuloSeleccionado?.descripcion }}
+              </mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="stats-grid">
+                <div class="stat-card">
+                  <div class="stat-value">{{ analisis.periodos }}</div>
+                  <div class="stat-label">Períodos históricos</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value">{{ analisis.media | number:'1.1-1' }}</div>
+                  <div class="stat-label">Media de ventas</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value">{{ analisis.desviacion_estandar | number:'1.1-1' }}</div>
+                  <div class="stat-label">Desviación estándar</div>
+                </div>
+                <div class="stat-card">
+                  <span class="tendencia-badge"
+                        [class.creciente]="analisis.tendencia === 'creciente'"
+                        [class.decreciente]="analisis.tendencia !== 'creciente'">
+                    @if (analisis.tendencia === 'creciente') {
+                      <mat-icon style="font-size:16px;height:16px;width:16px">trending_up</mat-icon>
+                      Creciente
+                    } @else {
+                      <mat-icon style="font-size:16px;height:16px;width:16px">trending_down</mat-icon>
+                      Decreciente
+                    }
+                  </span>
+                  <div class="stat-label">Tendencia</div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+
+        <!-- Gráfica de pronóstico -->
+        @if (resultados.length > 0) {
+          <mat-card class="chart-card">
+            <mat-card-content>
+              <div class="chart-wrap">
+                <canvas id="chartForecast"></canvas>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Tabla de resultados -->
+          <mat-card class="results-card">
+            <mat-card-header>
+              <mat-card-title>Detalle del Pronóstico</mat-card-title>
+              @if (modeloGanador) {
+                <mat-card-subtitle>
+                  Modelo usado: <strong>{{ getModeloLabel(modeloGanador) }}</strong>
+                  @if (numeroModelosComparados() > 1) {
+                    — el más preciso de {{ numeroModelosComparados() }} evaluados con tu historial
+                  }
+                </mat-card-subtitle>
+              }
+            </mat-card-header>
+            <mat-card-content>
+              <table mat-table [dataSource]="resultados" class="full-width results-table">
+                <ng-container matColumnDef="fecha">
+                  <th mat-header-cell *matHeaderCellDef>Período</th>
+                  <td mat-cell *matCellDef="let row"><strong>{{ row.fecha }}</strong></td>
+                </ng-container>
+                <ng-container matColumnDef="demanda_proyectada">
+                  <th mat-header-cell *matHeaderCellDef>Demanda Proyectada</th>
+                  <td mat-cell *matCellDef="let row">
+                    <span class="demand-value" [class.high]="isHighDemand(row.demanda_proyectada)">
+                      {{ row.demanda_proyectada | number:'1.2-2' }}
+                    </span>
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="barra">
+                  <th mat-header-cell *matHeaderCellDef>Distribución</th>
+                  <td mat-cell *matCellDef="let row">
+                    <div class="forecast-bar-wrap">
+                      <div class="forecast-bar"
+                           [class.high]="isHighDemand(row.demanda_proyectada)"
+                           [style.width.%]="getBarWidth(row.demanda_proyectada)">
+                      </div>
+                      <span class="bar-pct">{{ getBarWidth(row.demanda_proyectada) }}%</span>
+                    </div>
+                  </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="displayedColumnsResultados"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumnsResultados;"></tr>
+              </table>
+
+              @if (articuloSeleccionado?.stock_actual !== undefined) {
+                <div class="stock-hint">
+                  <mat-icon>inventory_2</mat-icon>
+                  Stock actual: <strong>{{ articuloSeleccionado.stock_actual | number:'1.0-0' }}</strong> unidades
+                  &nbsp;·&nbsp; Barras <span class="bar-sample high"></span> en naranja superan el stock.
+                </div>
+              }
+            </mat-card-content>
+          </mat-card>
+        }
+
+        <!-- EOQ (cantidad económica de pedido) -->
+        @if (resultados.length > 0) {
+          <mat-card class="stats-card">
+            <mat-card-header>
+              <mat-card-title>Cantidad Económica de Pedido (EOQ)</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              @if (calculandoEoq) {
+                <div class="loading-center"><mat-spinner diameter="32"></mat-spinner></div>
+              } @else if (errorEoq) {
+                <div class="no-data-msg">
+                  <mat-icon>info</mat-icon>
+                  {{ errorEoq }}
+                </div>
+              } @else if (eoq) {
+                <div class="stats-grid">
+                  <div class="stat-card">
+                    <div class="stat-value">{{ eoq.cantidad_economica_pedido | number:'1.0-0' }}</div>
+                    <div class="stat-label">Unidades por pedido (EOQ)</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-value">{{ eoq.numero_pedidos_por_anio | number:'1.1-1' }}</div>
+                    <div class="stat-label">Pedidos por año</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-value">{{ eoq.dias_entre_pedidos | number:'1.0-0' }}</div>
+                    <div class="stat-label">Días entre pedidos</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-value">{{ eoq.demanda_anual_estimada | number:'1.0-0' }}</div>
+                    <div class="stat-label">Demanda anual estimada</div>
+                  </div>
+                </div>
+              }
+            </mat-card-content>
+          </mat-card>
+        }
+
+        <!-- Estado inicial -->
+        @if (!calculando && resultados.length === 0 && !errorCalculo) {
+          <div class="no-data-msg">
+            <mat-icon>query_stats</mat-icon>
+            Selecciona un artículo y presiona <em>Generar Pronóstico</em>
+          </div>
+        }
+
+      </div>
+    </mat-tab>
+
+    <!-- ══════════════════════════════════════════════════════════
+         TAB 2 — MÁS VENDIDOS
+    ══════════════════════════════════════════════════════════ -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">bar_chart</mat-icon>
+        Más Vendidos
+      </ng-template>
+
+      <div class="tab-content">
+        @if (loadingMasVendidos) {
+          <div class="loading-center"><mat-spinner diameter="48"></mat-spinner></div>
+        } @else if (masVendidos.length === 0) {
+          <div class="no-data-msg">
+            <mat-icon>bar_chart</mat-icon>
+            No hay datos de ventas disponibles.
+          </div>
+        } @else {
+          <!-- Gráfica -->
+          <mat-card class="chart-card">
+            <mat-card-content>
+              <div class="chart-wrap chart-horizontal">
+                <canvas id="chartMasVendidos"></canvas>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Tabla -->
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>Top 20 Artículos</mat-card-title>
+              <span class="header-spacer"></span>
+              <div class="export-actions">
+                <button mat-stroked-button [disabled]="exportandoMasVendidos" (click)="exportarMasVendidos('pdf')">
+                  @if (exportandoMasVendidos) {
+                    <mat-spinner diameter="16" style="display:inline-block;margin-right:6px;"></mat-spinner>
+                  } @else {
+                    <mat-icon>picture_as_pdf</mat-icon>
+                  }
+                  PDF
+                </button>
+                <button mat-stroked-button [disabled]="exportandoMasVendidos" (click)="exportarMasVendidos('excel')">
+                  <mat-icon>grid_on</mat-icon> Excel
+                </button>
+              </div>
+            </mat-card-header>
+            <mat-card-content>
+              <table mat-table [dataSource]="masVendidos" class="full-width">
+                <ng-container matColumnDef="pos">
+                  <th mat-header-cell *matHeaderCellDef>#</th>
+                  <td mat-cell *matCellDef="let row; let i = index">
+                    <span class="rank-badge" [class.top3]="i < 3">#{{ i + 1 }}</span>
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="codigo">
+                  <th mat-header-cell *matHeaderCellDef>Código</th>
+                  <td mat-cell *matCellDef="let row">
+                    <strong>{{ row.articulo__codigo ?? row.codigo }}</strong>
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="descripcion">
+                  <th mat-header-cell *matHeaderCellDef>Descripción</th>
+                  <td mat-cell *matCellDef="let row">
+                    {{ row.articulo__descripcion ?? row.descripcion }}
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="total_vendido">
+                  <th mat-header-cell *matHeaderCellDef>Total Vendido</th>
+                  <td mat-cell *matCellDef="let row">
+                    <strong>{{ (row.total_vendido ?? 0) | number:'1.0-0' }}</strong>
+                  </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="displayedColumnsMasVendidos"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumnsMasVendidos;"></tr>
+              </table>
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+    </mat-tab>
+
+    <!-- ══════════════════════════════════════════════════════════
+         TAB 3 — RECOMENDACIONES
+    ══════════════════════════════════════════════════════════ -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">shopping_cart</mat-icon>
+        Recomendaciones
+      </ng-template>
+
+      <div class="tab-content">
+        @if (loadingRecomendaciones) {
+          <div class="loading-center"><mat-spinner diameter="48"></mat-spinner></div>
+        } @else {
+
+          <!-- Filtro por código -->
+          <mat-card class="filter-card">
+            <mat-card-content>
+              <mat-form-field appearance="outline" class="filter-field">
+                <mat-label>Filtrar por código o descripción</mat-label>
+                <mat-icon matPrefix style="margin-right:8px">search</mat-icon>
+                <input matInput [(ngModel)]="filtroCodigo"
+                       (input)="aplicarFiltro()"
+                       placeholder="Ej: 1764, BICARBONATO...">
+                @if (filtroCodigo) {
+                  <button matSuffix mat-icon-button (click)="filtroCodigo=''; aplicarFiltro()">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                }
+              </mat-form-field>
+              <mat-slide-toggle [(ngModel)]="soloExceso" (change)="aplicarFiltro()" color="primary">
+                Solo exceso de inventario
+                @if (totalExceso() > 0) {
+                  <span class="exceso-count-badge">{{ totalExceso() }}</span>
+                }
+              </mat-slide-toggle>
+              <span class="filter-count">
+                {{ recomendacionesFiltradas.length }} de {{ recomendaciones.length }} artículos
+              </span>
+            </mat-card-content>
+          </mat-card>
+
+          @if (recomendacionesFiltradas.length === 0) {
+            <div class="no-data-msg">
+              <mat-icon>shopping_cart</mat-icon>
+              No hay recomendaciones. Calcula pronósticos primero.
+            </div>
+          } @else {
+            <!-- Gráfica -->
+            <mat-card class="chart-card">
+              <mat-card-content>
+                <div class="chart-wrap">
+                  <canvas id="chartRecomendaciones"></canvas>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Tabla -->
+            <mat-card>
+              <mat-card-header>
+                <mat-card-title>Detalle de Recomendaciones</mat-card-title>
+                <mat-card-subtitle>Ordenadas por prioridad</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="table-wrapper">
+                  <table mat-table [dataSource]="dataSourceRecomendaciones" matSort #sortRecomendaciones="matSort" class="full-width">
+                    <ng-container matColumnDef="pos">
+                      <th mat-header-cell *matHeaderCellDef>#</th>
+                      <td mat-cell *matCellDef="let row; let i = index">{{ i + 1 }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="articulo">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Artículo</th>
+                      <td mat-cell *matCellDef="let row">
+                        <strong>{{ row.codigo }}</strong>
+                        <br><small class="text-muted">{{ row.descripcion }}</small>
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="stock_actual">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Stock Actual</th>
+                      <td mat-cell *matCellDef="let row">{{ row.stock_actual | number:'1.0-0' }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="demanda_proyectada">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Demanda Proyectada</th>
+                      <td mat-cell *matCellDef="let row">{{ row.demanda_proyectada | number:'1.1-1' }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="cantidad_recomendada">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Cantidad Recomendada</th>
+                      <td mat-cell *matCellDef="let row">
+                        <strong>{{ row.cantidad_recomendada | number:'1.0-0' }}</strong>
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="prioridad">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Prioridad</th>
+                      <td mat-cell *matCellDef="let row">
+                        <span class="prioridad-chip"
+                              [ngClass]="getPrioridadClass(row.nivel_prioridad)">
+                          {{ getPrioridadLabel(row.nivel_prioridad) }}
+                        </span>
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="exceso">
+                      <th mat-header-cell *matHeaderCellDef>Inventario</th>
+                      <td mat-cell *matCellDef="let row">
+                        @if (row.exceso_inventario) {
+                          <span class="exceso-chip" matTooltip="Stock actual muy por encima de la demanda proyectada (más del doble)">
+                            <mat-icon inline>trending_down</mat-icon> Exceso
+                          </span>
+                        }
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="acciones">
+                      <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                      <td mat-cell *matCellDef="let row">
+                        @if (row.cantidad_recomendada > 0) {
+                          <button mat-stroked-button color="primary"
+                                  (click)="generarOrden(row)"
+                                  [disabled]="generandoOrdenPara === row.articulo_id"
+                                  matTooltip="Generar orden de compra con la cantidad recomendada">
+                            @if (generandoOrdenPara === row.articulo_id) {
+                              <mat-spinner diameter="16" style="display:inline-block;margin-right:6px;"></mat-spinner>
+                            } @else {
+                              <mat-icon>add_shopping_cart</mat-icon>
+                            }
+                            Generar Orden
+                          </button>
+                        }
+                      </td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="displayedColumnsRecomendaciones"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumnsRecomendaciones;"
+                        class="table-row"></tr>
+                  </table>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        }
+      </div>
+    </mat-tab>
+
+    <!-- ══════════════════════════════════════════════════════════
+         TAB 4 — PRODUCCIÓN (KITS PRODUCIBLES)
+    ══════════════════════════════════════════════════════════ -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">precision_manufacturing</mat-icon>
+        Producción
+      </ng-template>
+
+      <div class="tab-content">
+        @if (loadingKitsProducibles) {
+          <div class="loading-center"><mat-spinner diameter="48"></mat-spinner></div>
+        } @else if (kitsProducibles.length === 0) {
+          <div class="no-data-msg">
+            <mat-icon>precision_manufacturing</mat-icon>
+            No hay kits definidos todavía. Crea un kit con sus componentes desde la API de inventario para ver aquí cuántas unidades se pueden producir.
+          </div>
+        } @else {
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>Kits Producibles con el Stock Actual</mat-card-title>
+              <mat-card-subtitle>Cuántas unidades de cada kit se pueden armar hoy, y qué componente lo limita</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="table-wrapper">
+                <table mat-table [dataSource]="kitsProducibles" class="full-width">
+                  <ng-container matColumnDef="codigo">
+                    <th mat-header-cell *matHeaderCellDef>Kit</th>
+                    <td mat-cell *matCellDef="let row">
+                      <strong>{{ row.codigo }}</strong>
+                      <br><small class="text-muted">{{ row.descripcion }}</small>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="producible">
+                    <th mat-header-cell *matHeaderCellDef>Máx. Producible</th>
+                    <td mat-cell *matCellDef="let row">
+                      <span class="prioridad-chip" [ngClass]="row.max_producible > 0 ? 'prioridad-bajo' : 'prioridad-critico'">
+                        {{ row.max_producible | number:'1.0-0' }} unidades
+                      </span>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="componente">
+                    <th mat-header-cell *matHeaderCellDef>Componente Limitante</th>
+                    <td mat-cell *matCellDef="let row">
+                      @if (row.componente_limitante) {
+                        {{ row.componente_limitante.codigo }} — {{ row.componente_limitante.descripcion }}
+                      } @else {
+                        —
+                      }
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="detalle">
+                    <th mat-header-cell *matHeaderCellDef>Disponible / Requerido por unidad</th>
+                    <td mat-cell *matCellDef="let row">
+                      @if (row.componente_limitante) {
+                        {{ row.componente_limitante.stock_disponible | number:'1.0-2' }} / {{ row.componente_limitante.requerido_por_unidad | number:'1.0-2' }}
+                      } @else {
+                        —
+                      }
+                    </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="displayedColumnsKits"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedColumnsKits;" class="table-row"></tr>
+                </table>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+    </mat-tab>
+
+    <!-- ══════════════════════════════════════════════════════════
+         TAB 5 — COMPARAR PERIODOS
+    ══════════════════════════════════════════════════════════ -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">compare_arrows</mat-icon>
+        Comparar Periodos
+      </ng-template>
+
+      <div class="tab-content">
+        <mat-card class="calc-card">
+          <mat-card-header>
+            <mat-card-title>Comparar Ventas entre Periodos</mat-card-title>
+            <mat-card-subtitle>Unidades y valor vendido entre dos rangos de fechas — todo el catálogo o un artículo específico</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="preset-buttons">
+              <button mat-stroked-button (click)="aplicarPresetComparacion('mes')">Este mes vs. anterior</button>
+              <button mat-stroked-button (click)="aplicarPresetComparacion('trimestre')">Este trimestre vs. anterior</button>
+              <button mat-stroked-button (click)="aplicarPresetComparacion('anio')">Este año vs. anterior</button>
+            </div>
+
+            <div class="periodos-grid">
+              <div class="periodo-col">
+                <span class="periodo-label periodo-1">Periodo 1</span>
+                <mat-form-field appearance="outline">
+                  <mat-label>Desde</mat-label>
+                  <input matInput [matDatepicker]="pickerP1Desde" [(ngModel)]="comp_p1Desde">
+                  <mat-datepicker-toggle matSuffix [for]="pickerP1Desde"></mat-datepicker-toggle>
+                  <mat-datepicker #pickerP1Desde></mat-datepicker>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Hasta</mat-label>
+                  <input matInput [matDatepicker]="pickerP1Hasta" [(ngModel)]="comp_p1Hasta">
+                  <mat-datepicker-toggle matSuffix [for]="pickerP1Hasta"></mat-datepicker-toggle>
+                  <mat-datepicker #pickerP1Hasta></mat-datepicker>
+                </mat-form-field>
+              </div>
+              <mat-icon class="vs-icon">compare_arrows</mat-icon>
+              <div class="periodo-col">
+                <span class="periodo-label periodo-2">Periodo 2</span>
+                <mat-form-field appearance="outline">
+                  <mat-label>Desde</mat-label>
+                  <input matInput [matDatepicker]="pickerP2Desde" [(ngModel)]="comp_p2Desde">
+                  <mat-datepicker-toggle matSuffix [for]="pickerP2Desde"></mat-datepicker-toggle>
+                  <mat-datepicker #pickerP2Desde></mat-datepicker>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Hasta</mat-label>
+                  <input matInput [matDatepicker]="pickerP2Hasta" [(ngModel)]="comp_p2Hasta">
+                  <mat-datepicker-toggle matSuffix [for]="pickerP2Hasta"></mat-datepicker-toggle>
+                  <mat-datepicker #pickerP2Hasta></mat-datepicker>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <mat-form-field appearance="outline" class="full">
+              <mat-label>Artículo (opcional — vacío compara todo el catálogo)</mat-label>
+              <mat-icon matPrefix style="margin-right:8px;color:#3949ab">inventory_2</mat-icon>
+              <input matInput [value]="comparacionArticuloSearch" (input)="onComparacionArticuloSearch($event)"
+                     [matAutocomplete]="autoArtComp"
+                     placeholder="Buscar por código o descripción...">
+              @if (comparacionArticuloSeleccionado) {
+                <button matSuffix mat-icon-button (click)="limpiarArticuloComparacion()">
+                  <mat-icon>close</mat-icon>
+                </button>
+              }
+              <mat-autocomplete #autoArtComp="matAutocomplete">
+                @for (art of comparacionArticulosFiltrados; track art.id) {
+                  <mat-option [value]="art.codigo + ' - ' + art.descripcion"
+                              (click)="seleccionarArticuloComparacion(art)">
+                    <strong>{{ art.codigo }}</strong> — {{ art.descripcion }}
+                  </mat-option>
+                }
+              </mat-autocomplete>
+            </mat-form-field>
+
+            <div class="forecast-actions">
+              <button mat-raised-button color="primary"
+                      (click)="compararPeriodos()"
+                      [disabled]="comparando"
+                      class="forecast-btn">
+                @if (comparando) {
+                  <mat-spinner diameter="20" style="display:inline-block;margin-right:8px;vertical-align:middle;"></mat-spinner>
+                  Comparando...
+                } @else {
+                  <ng-container>
+                    <mat-icon>compare_arrows</mat-icon>
+                    Comparar
+                  </ng-container>
+                }
+              </button>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        @if (errorComparacion) {
+          <div class="error-calc">
+            <mat-icon>warning_amber</mat-icon>
+            <div>{{ errorComparacion }}</div>
+          </div>
+        }
+
+        @if (resultadoComparacion) {
+          <div class="comparacion-summary">
+            <mat-card class="summary-card">
+              <div class="summary-label">Periodo 1</div>
+              <div class="summary-dates">{{ resultadoComparacion.periodo_1.desde }} → {{ resultadoComparacion.periodo_1.hasta }}</div>
+              <div class="summary-value">{{ resultadoComparacion.periodo_1.unidades | number:'1.0-0' }} uds</div>
+              <div class="summary-sub">{{ resultadoComparacion.periodo_1.valor | currency:'COP':'symbol':'1.0-0' }}</div>
+            </mat-card>
+            <mat-card class="summary-card variacion-card"
+                      [class.positiva]="(resultadoComparacion.variacion_pct_unidades ?? 0) >= 0"
+                      [class.negativa]="(resultadoComparacion.variacion_pct_unidades ?? 0) < 0">
+              <mat-icon>{{ (resultadoComparacion.variacion_pct_unidades ?? 0) >= 0 ? 'trending_up' : 'trending_down' }}</mat-icon>
+              <div class="summary-value">
+                @if (resultadoComparacion.variacion_pct_unidades !== null) {
+                  {{ resultadoComparacion.variacion_pct_unidades > 0 ? '+' : '' }}{{ resultadoComparacion.variacion_pct_unidades }}%
+                } @else {
+                  N/D
+                }
+              </div>
+              <div class="summary-sub">variación en unidades</div>
+            </mat-card>
+            <mat-card class="summary-card">
+              <div class="summary-label">Periodo 2</div>
+              <div class="summary-dates">{{ resultadoComparacion.periodo_2.desde }} → {{ resultadoComparacion.periodo_2.hasta }}</div>
+              <div class="summary-value">{{ resultadoComparacion.periodo_2.unidades | number:'1.0-0' }} uds</div>
+              <div class="summary-sub">{{ resultadoComparacion.periodo_2.valor | currency:'COP':'symbol':'1.0-0' }}</div>
+            </mat-card>
+          </div>
+
+          @if (resultadoComparacion.detalle.length === 0) {
+            <div class="no-data-msg">
+              <mat-icon>compare_arrows</mat-icon>
+              No hay ventas registradas en ninguno de los dos periodos.
+            </div>
+          } @else {
+            <mat-card class="chart-card">
+              <mat-card-content>
+                <div class="chart-wrap">
+                  <canvas id="chartComparacion"></canvas>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <mat-card>
+              <mat-card-header>
+                <mat-card-title>Detalle por Artículo</mat-card-title>
+                <mat-card-subtitle>
+                  Top {{ resultadoComparacion.detalle.length }} de {{ resultadoComparacion.total_articulos_con_venta }} artículos con ventas en alguno de los dos periodos
+                </mat-card-subtitle>
+                <span class="header-spacer"></span>
+                <div class="export-actions">
+                  <button mat-stroked-button [disabled]="exportandoComparacion" (click)="exportarComparacion('pdf')">
+                    @if (exportandoComparacion) {
+                      <mat-spinner diameter="16" style="display:inline-block;margin-right:6px;"></mat-spinner>
+                    } @else {
+                      <mat-icon>picture_as_pdf</mat-icon>
+                    }
+                    PDF
+                  </button>
+                  <button mat-stroked-button [disabled]="exportandoComparacion" (click)="exportarComparacion('excel')">
+                    <mat-icon>grid_on</mat-icon> Excel
+                  </button>
+                </div>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="table-wrapper">
+                  <table mat-table [dataSource]="resultadoComparacion.detalle" class="full-width">
+                    <ng-container matColumnDef="articulo">
+                      <th mat-header-cell *matHeaderCellDef>Artículo</th>
+                      <td mat-cell *matCellDef="let row">
+                        <strong>{{ row.codigo }}</strong>
+                        <br><small class="text-muted">{{ row.descripcion }}</small>
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="p1">
+                      <th mat-header-cell *matHeaderCellDef>Periodo 1</th>
+                      <td mat-cell *matCellDef="let row">{{ row.unidades_periodo_1 | number:'1.0-0' }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="p2">
+                      <th mat-header-cell *matHeaderCellDef>Periodo 2</th>
+                      <td mat-cell *matCellDef="let row">{{ row.unidades_periodo_2 | number:'1.0-0' }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="variacion">
+                      <th mat-header-cell *matHeaderCellDef>Variación</th>
+                      <td mat-cell *matCellDef="let row">
+                        @if (row.variacion_pct !== null) {
+                          <span class="variacion-chip" [class.positiva]="row.variacion_pct >= 0" [class.negativa]="row.variacion_pct < 0">
+                            <mat-icon style="font-size:14px;height:14px;width:14px">{{ row.variacion_pct >= 0 ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
+                            {{ row.variacion_pct > 0 ? '+' : '' }}{{ row.variacion_pct }}%
+                          </span>
+                        } @else {
+                          <span class="text-muted">N/D</span>
+                        }
+                      </td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="displayedColumnsComparacion"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumnsComparacion;" class="table-row"></tr>
+                  </table>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        }
+      </div>
+    </mat-tab>
+
+    <!-- ══════════════════════════════════════════════════════════
+         TAB 6 — REPORTE DE NECESIDADES POR MES
+    ══════════════════════════════════════════════════════════ -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">fact_check</mat-icon>
+        Reporte de Necesidades
+      </ng-template>
+
+      <div class="tab-content">
+        <mat-card class="calc-card">
+          <mat-card-header>
+            <mat-card-title>Reporte de Necesidades por Mes</mat-card-title>
+            <mat-card-subtitle>Elige un mes ya pronosticado y obtén el listado de productos y cantidades a comprar</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            @if (loadingMeses) {
+              <div class="loading-center"><mat-spinner diameter="32"></mat-spinner></div>
+            } @else if (mesesDisponibles.length === 0) {
+              <div class="no-data-msg">
+                <mat-icon>fact_check</mat-icon>
+                No hay meses pronosticados todavía. Calcula pronósticos primero (botón "Pronóstico masivo" o desde la pestaña Forecasting).
+              </div>
+            } @else {
+              <div class="reporte-selector">
+                <mat-form-field appearance="outline">
+                  <mat-label>Mes</mat-label>
+                  <mat-select [(ngModel)]="mesSeleccionado">
+                    @for (mes of mesesDisponibles; track mes) {
+                      <mat-option [value]="mes">{{ getNombreMes(mes) }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+                <button mat-raised-button color="primary"
+                        (click)="generarReporte()"
+                        [disabled]="loadingReporte || !mesSeleccionado"
+                        class="forecast-btn">
+                  @if (loadingReporte) {
+                    <mat-spinner diameter="20" style="display:inline-block;margin-right:8px;vertical-align:middle;"></mat-spinner>
+                    Generando...
+                  } @else {
+                    <ng-container>
+                      <mat-icon>fact_check</mat-icon>
+                      Generar Reporte
+                    </ng-container>
+                  }
+                </button>
+                @if (reporteNecesidades) {
+                  <button mat-stroked-button color="primary"
+                          (click)="descargarReportePdf()"
+                          [disabled]="descargandoPdfReporte"
+                          matTooltip="Descargar reporte en PDF">
+                    @if (descargandoPdfReporte) {
+                      <mat-spinner diameter="18" style="display:inline-block;margin-right:6px;"></mat-spinner>
+                    } @else {
+                      <mat-icon>picture_as_pdf</mat-icon>
+                    }
+                    Descargar PDF
+                  </button>
+                }
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+
+        @if (errorReporte) {
+          <div class="error-calc">
+            <mat-icon>warning_amber</mat-icon>
+            <div>{{ errorReporte }}</div>
+          </div>
+        }
+
+        @if (reporteNecesidades) {
+          <div class="comparacion-summary reporte-summary">
+            <mat-card class="summary-card">
+              <div class="summary-value">{{ reporteNecesidades.total_articulos }}</div>
+              <div class="summary-sub">artículos con pronóstico para {{ getNombreMes(reporteNecesidades.mes) }}</div>
+            </mat-card>
+            <mat-card class="summary-card variacion-card" [class.negativa]="reporteNecesidades.total_requieren_compra > 0" [class.positiva]="reporteNecesidades.total_requieren_compra === 0">
+              <div class="summary-value">{{ reporteNecesidades.total_requieren_compra }}</div>
+              <div class="summary-sub">requieren compra</div>
+            </mat-card>
+          </div>
+
+          @if (reporteNecesidades.total_requieren_compra === 0) {
+            <div class="no-data-msg">
+              <mat-icon>check_circle</mat-icon>
+              Ningún artículo requiere compra para {{ getNombreMes(reporteNecesidades.mes) }}.
+            </div>
+          } @else {
+            <mat-card>
+              <mat-card-header>
+                <mat-card-title>Listado de Compras — {{ getNombreMes(reporteNecesidades.mes) }}</mat-card-title>
+                <mat-card-subtitle>Ordenado por cantidad a comprar, de mayor a menor</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="table-wrapper">
+                  <table mat-table [dataSource]="itemsAComprar()" class="full-width">
+                    <ng-container matColumnDef="codigo">
+                      <th mat-header-cell *matHeaderCellDef>Artículo</th>
+                      <td mat-cell *matCellDef="let row">
+                        <strong>{{ row.codigo }}</strong>
+                        <br><small class="text-muted">{{ row.descripcion }}</small>
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="demanda">
+                      <th mat-header-cell *matHeaderCellDef>Demanda Proyectada</th>
+                      <td mat-cell *matCellDef="let row">{{ row.demanda_proyectada | number:'1.0-2' }} {{ row.unidad_medida }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="stock">
+                      <th mat-header-cell *matHeaderCellDef>Stock Estimado</th>
+                      <td mat-cell *matCellDef="let row">{{ row.stock_disponible_estimado | number:'1.0-2' }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="comprar">
+                      <th mat-header-cell *matHeaderCellDef>Cantidad a Comprar</th>
+                      <td mat-cell *matCellDef="let row">
+                        @if (row.cantidad_a_comprar > 0) {
+                          <strong class="demand-value high">{{ row.cantidad_a_comprar | number:'1.0-2' }}</strong>
+                        } @else {
+                          <span class="text-muted">—</span>
+                        }
+                      </td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="displayedColumnsReporte"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumnsReporte;" class="table-row"></tr>
+                  </table>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        }
+      </div>
+    </mat-tab>
+
+  </mat-tab-group>
+</div>

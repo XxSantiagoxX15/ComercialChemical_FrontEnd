@@ -1,0 +1,165 @@
+<div class="layout" (click)="showUserMenu && (showUserMenu = false)">
+
+  <!-- Fondo oscuro detrás del sidebar cuando es un overlay (tablet/celular) -->
+  @if (isMobile && isSidebarOpen) {
+    <div class="sidebar-backdrop" (click)="toggleSidebar()"></div>
+  }
+
+  <!-- ══ SIDEBAR ══ -->
+  <aside class="sidebar" [class.closed]="!isSidebarOpen">
+
+    <!-- Logo -->
+    <div class="logo-area">
+      <div class="logo-img-wrap">
+        <img src="assets/images/LogoComercialFin.png" alt="Comercial Chemical" />
+      </div>
+      <div class="logo-text">
+        <h2>CHEM-MODINV</h2>
+        <small>Comercial Chemical S.A.S.</small>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="nav-section" (click)="closeSidebarIfMobile()">
+
+      <div class="nav-label">Principal</div>
+
+      <a routerLink="/dashboard"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }"
+         class="nav-item">
+        <span class="material-icons nav-icon">dashboard</span>
+        <span class="nav-text">Dashboard</span>
+      </a>
+
+    <div class="nav-label">Inventario</div>
+
+      <a routerLink="/inventario/articulos"
+         routerLinkActive="active"
+         class="nav-item">
+        <span class="material-icons nav-icon">inventory_2</span>
+        <span class="nav-text">Artículos</span>
+      </a>
+
+    
+      <a routerLink="/inventario/calculadora" routerLinkActive="active" class="nav-item btn">
+        <span class="material-icons nav-icon">calculate</span>
+        <span class="nav-text">Calculadora de precios</span>
+      </a>
+
+      <a routerLink="/inventario/movimientos"
+         routerLinkActive="active"
+         class="nav-item">
+        <span class="material-icons nav-icon">swap_horiz</span>
+        <span class="nav-text">Movimientos</span>
+      </a>
+
+      <a routerLink="/inventario/alertas"
+         routerLinkActive="active"
+         class="nav-item">
+        <span class="material-icons nav-icon">notifications_active</span>
+        <span class="nav-text">Alertas</span>
+      </a>
+
+      <div class="nav-label">Operaciones</div>
+
+      <a routerLink="/compras/ordenes"
+         routerLinkActive="active"
+         class="nav-item">
+        <span class="material-icons nav-icon">shopping_cart</span>
+        <span class="nav-text">Compras</span>
+      </a>
+
+      <a routerLink="/pronosticos"
+         routerLinkActive="active"
+         class="nav-item">
+        <span class="material-icons nav-icon">trending_up</span>
+        <span class="nav-text">Pronósticos</span>
+      </a>
+
+      <a routerLink="/importacion"
+         routerLinkActive="active"
+         class="nav-item">
+        <span class="material-icons nav-icon">upload_file</span>
+        <span class="nav-text">Importación</span>
+      </a>
+
+      @if (isAdmin) {
+        <div class="nav-label">Administración</div>
+
+        <a routerLink="/auditoria"
+           routerLinkActive="active"
+           class="nav-item">
+          <span class="material-icons nav-icon">manage_search</span>
+          <span class="nav-text">Auditoría</span>
+        </a>
+
+        <a routerLink="/usuarios"
+           routerLinkActive="active"
+           class="nav-item">
+          <span class="material-icons nav-icon">group</span>
+          <span class="nav-text">Usuarios</span>
+        </a>
+      }
+
+    </nav>
+
+    <!-- Footer / Logout -->
+    <div class="sidebar-footer">
+      <a class="nav-item logout-item" (click)="logout()">
+        <span class="material-icons nav-icon">logout</span>
+        <span class="nav-text">Cerrar sesión</span>
+      </a>
+    </div>
+
+  </aside>
+
+  <!-- ══ MAIN ══ -->
+  <div class="main">
+
+    <!-- Header -->
+    <header class="header">
+      <button class="toggle-btn" (click)="toggleSidebar()" title="Expandir / colapsar menú"
+              aria-label="Toggle sidebar">
+        <span class="material-icons-round">menu</span>
+      </button>
+
+      <div class="header-title">
+        CHEM-MODINV
+        <span class="version-badge">v1.0</span>
+      </div>
+
+      <div class="h-divider"></div>
+
+      <!-- User menu -->
+      <div class="user-btn" (click)="toggleUserMenu(); $event.stopPropagation()">
+        <div class="avatar">{{ userName.charAt(0).toUpperCase() }}</div>
+        <div class="user-info">
+          <span class="user-name">{{ userName }}</span>
+          <span class="user-role">{{ userRole }}</span>
+        </div>
+        <span class="material-icons chevron">expand_more</span>
+
+        @if (showUserMenu) {
+          <div class="dropdown" (click)="$event.stopPropagation()">
+            <div class="dropdown-header">
+              <div class="dropdown-name">{{ userName }}</div>
+              <div class="dropdown-email">{{ userRole }}</div>
+            </div>
+            <button class="dropdown-btn" (click)="logout()">
+              <span class="material-icons">logout</span>
+              Cerrar sesión
+            </button>
+          </div>
+        }
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="content">
+      <router-outlet />
+    </main>
+
+  </div>
+
+</div>
