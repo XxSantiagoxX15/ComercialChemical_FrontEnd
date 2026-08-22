@@ -63,15 +63,12 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/usuarios/usuarios.component').then(m => m.UsuariosComponent),
       },
-<<<<<<< HEAD
-       {
+      {
         path: 'inventario/calculadora',
         loadComponent: () =>
           import('./features/inventario/price-calculator/price-calculator.component')
             .then(m => m.PriceCalculatorComponent)
       },
-=======
->>>>>>> 1298a77a147d64e2ea814727f8c6855468eef0b0
       {
         path: 'auditoria',
         canActivate: [adminGuard],
