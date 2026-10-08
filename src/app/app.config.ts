@@ -5,11 +5,12 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { SelectivePreloadingStrategy } from './core/strategies/selective-preloading.strategy';
+import { cifradoInterceptor } from './core/interceptors/cifrado.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes, withPreloading(SelectivePreloadingStrategy)),
-    provideHttpClient(withInterceptors([authInterceptor])),
+    provideHttpClient(withInterceptors([authInterceptor, cifradoInterceptor])),
     provideAnimations(),
   ]
 };
