@@ -1,4 +1,4 @@
-<div class="layout" (click)="showUserMenu && (showUserMenu = false)">
+<div class="layout" (click)="cerrarMenuUsuario()">
 
   <!-- Fondo oscuro detrás del sidebar cuando es un overlay (tablet/celular) -->
   @if (isMobile && isSidebarOpen) {
@@ -20,79 +20,103 @@
     </div>
 
     <!-- Navigation -->
-    <nav class="nav-section" (click)="closeSidebarIfMobile()">
+      <nav class="nav-section" (click)="closeSidebarIfMobile()">
 
-      <div class="nav-label">Principal</div>
+      <!-- Cada opción se muestra solo si el rol tiene el módulo de esa pantalla;
+           cada título, solo si queda visible alguna opción de su sección. -->
 
-      <a routerLink="/dashboard"
-         routerLinkActive="active"
-         [routerLinkActiveOptions]="{ exact: true }"
-         class="nav-item">
-        <span class="material-icons nav-icon">dashboard</span>
-        <span class="nav-text">Dashboard</span>
-      </a>
+      @if (puedeAlguna('/dashboard')) {
+        <div class="nav-label">Principal</div>
+      }
+      @if (puede('/dashboard')) {
+        <a routerLink="/dashboard"
+           routerLinkActive="active"
+           [routerLinkActiveOptions]="{ exact: true }"
+           class="nav-item">
+          <span class="material-icons nav-icon">dashboard</span>
+          <span class="nav-text">Dashboard</span>
+        </a>
+      }
 
-      <div class="nav-label">Inventario</div>
+      @if (puedeAlguna('/inventario/articulos', '/inventario/calculadora', '/inventario/movimientos', '/inventario/alertas')) {
+        <div class="nav-label">Inventario</div>
+      }
+      @if (puede('/inventario/articulos')) {
+        <a routerLink="/inventario/articulos"
+           routerLinkActive="active"
+           class="nav-item">
+          <span class="material-icons nav-icon">inventory_2</span>
+          <span class="nav-text">Artículos</span>
+        </a>
 
-      <a routerLink="/inventario/articulos"
-         routerLinkActive="active"
-         class="nav-item">
-        <span class="material-icons nav-icon">inventory_2</span>
-        <span class="nav-text">Artículos</span>
-      </a>
+      }
+      @if (puede('/inventario/calculadora')) {
+        <a routerLink="/inventario/calculadora"
+           routerLinkActive="active"
+           class="nav-item">
+          <span class="material-icons nav-icon">calculate</span>
+          <span class="nav-text">Calculadora de precios</span>
+        </a>
+      }
 
-      <a routerLink="/inventario/calculadora" routerLinkActive="active" class="nav-item btn">
-        <span class="material-icons nav-icon">calculate</span>
-        <span class="nav-text">Calculadora de precios</span>
-      </a>
 
-      <a routerLink="/inventario/movimientos"
-         routerLinkActive="active"
-         class="nav-item">
-        <span class="material-icons nav-icon">swap_horiz</span>
-        <span class="nav-text">Movimientos</span>
-      </a>
+      @if (puede('/inventario/movimientos')) {
+        <a routerLink="/inventario/movimientos"
+           routerLinkActive="active"
+           class="nav-item">
+          <span class="material-icons nav-icon">swap_horiz</span>
+          <span class="nav-text">Movimientos</span>
+        </a>
+      }
+      @if (puede('/inventario/alertas')) {
+        <a routerLink="/inventario/alertas"
+           routerLinkActive="active"
+           class="nav-item">
+          <span class="material-icons nav-icon">notifications_active</span>
+          <span class="nav-text">Alertas</span>
+        </a>
+      }
 
-      <a routerLink="/inventario/alertas"
-         routerLinkActive="active"
-         class="nav-item">
-        <span class="material-icons nav-icon">notifications_active</span>
-        <span class="nav-text">Alertas</span>
-      </a>
+      @if (puedeAlguna('/compras/ordenes', '/pronosticos', '/importacion')) {
+        <div class="nav-label">Operaciones</div>
+      }
+      @if (puede('/compras/ordenes')) {
+        <a routerLink="/compras/ordenes"
+           routerLinkActive="active"
+           class="nav-item">
+          <span class="material-icons nav-icon">shopping_cart</span>
+          <span class="nav-text">Compras</span>
+        </a>
+      }
+      @if (puede('/pronosticos')) {
+        <a routerLink="/pronosticos"
+           routerLinkActive="active"
+           class="nav-item">
+          <span class="material-icons nav-icon">trending_up</span>
+          <span class="nav-text">Pronósticos</span>
+        </a>
+      }
+      @if (puede('/importacion')) {
+        <a routerLink="/importacion"
+           routerLinkActive="active"
+           class="nav-item">
+          <span class="material-icons nav-icon">upload_file</span>
+          <span class="nav-text">Importación</span>
+        </a>
+      }
 
-      <div class="nav-label">Operaciones</div>
-
-      <a routerLink="/compras/ordenes"
-         routerLinkActive="active"
-         class="nav-item">
-        <span class="material-icons nav-icon">shopping_cart</span>
-        <span class="nav-text">Compras</span>
-      </a>
-
-      <a routerLink="/pronosticos"
-         routerLinkActive="active"
-         class="nav-item">
-        <span class="material-icons nav-icon">trending_up</span>
-        <span class="nav-text">Pronósticos</span>
-      </a>
-
-      <a routerLink="/importacion"
-         routerLinkActive="active"
-         class="nav-item">
-        <span class="material-icons nav-icon">upload_file</span>
-        <span class="nav-text">Importación</span>
-      </a>
-
-      @if (isAdmin) {
+      @if (puedeAlguna('/auditoria', '/usuarios')) {
         <div class="nav-label">Administración</div>
-
+      }
+      @if (puede('/auditoria')) {
         <a routerLink="/auditoria"
            routerLinkActive="active"
            class="nav-item">
           <span class="material-icons nav-icon">manage_search</span>
           <span class="nav-text">Auditoría</span>
         </a>
-
+      }
+      @if (puede('/usuarios')) {
         <a routerLink="/usuarios"
            routerLinkActive="active"
            class="nav-item">
@@ -100,6 +124,7 @@
           <span class="nav-text">Usuarios</span>
         </a>
       }
+    
 
     </nav>
 

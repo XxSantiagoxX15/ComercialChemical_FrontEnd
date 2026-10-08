@@ -220,6 +220,7 @@ export class PermisosRolComponent implements OnInit {
 
   readonly MODULOS = [
     { key: 'dashboard',              label: 'Dashboard',                desc: 'Vista general y métricas',     icon: 'dashboard' },
+    { key: 'calculadora_precios',    label: 'Calculadora de precios',   desc: 'Costos, márgenes y precios',    icon: 'calculate' },
     { key: 'inventario_articulos',   label: 'Inventario - Artículos',   desc: 'Catálogo de productos',         icon: 'inventory_2' },
     { key: 'inventario_movimientos', label: 'Inventario - Movimientos', desc: 'Entradas y salidas de stock',   icon: 'swap_vert' },
     { key: 'inventario_alertas',     label: 'Inventario - Alertas',     desc: 'Notificaciones de stock bajo',  icon: 'notifications' },

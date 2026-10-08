@@ -16,7 +16,7 @@
         <mat-icon>sync</mat-icon> Recalcular todas
       </button>
 
-      <button mat-flat-button color="accent" (click)="guardarTodos()" [disabled]="guardando || filas.length === 0" type="button">
+      <button mat-raised-button color="primary" (click)="guardarTodos()" [disabled]="guardando || filas.length === 0" type="button">
         <mat-icon>save</mat-icon>
         {{ guardando ? 'Guardando…' : 'Guardar todas' }}
       </button>

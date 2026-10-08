@@ -8,6 +8,12 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/auth/login/login.component').then(m => m.LoginComponent),
   },
+    {
+    // «¿Olvidaste tu contraseña?»: pública, igual que el login.
+    path: 'recuperar',
+    loadComponent: () =>
+      import('./features/auth/recuperar/password.component').then(m => m.RecuperarPasswordComponent),
+  },
   {
     path: '',
     loadComponent: () =>
@@ -43,6 +49,12 @@ export const routes: Routes = [
         path: 'compras/cotizador',
         loadComponent: () =>
           import('./features/compras/cotizador/cotizador.component').then(m => m.CotizadorComponent),
+      },
+      {
+        // Pantalla de quien no tiene ningún módulo asignado.
+        path: 'sin-acceso',
+        loadComponent: () =>
+          import('./features/sin-acceso/sin-acceso.component').then(m => m.SinAccesoComponent),
       },
       {
         path: 'pronosticos',

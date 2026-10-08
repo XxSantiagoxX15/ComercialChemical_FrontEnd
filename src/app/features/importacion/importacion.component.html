@@ -43,10 +43,14 @@
         @if (!archivoSeleccionado) {
           <mat-icon class="drop-icon">cloud_upload</mat-icon>
           <p class="drop-text">Arrastra tu archivo aquí o</p>
-          <label class="file-label">
-            <input type="file" accept=".xlsx,.xls,.csv" (change)="onFileSelected($event)" hidden>
-            <span mat-raised-button class="select-btn">Seleccionar archivo</span>
-          </label>
+          <!-- El input real está oculto; el botón lo abre. -->
+          <input #selectorArchivo type="file" accept=".xlsx,.xls,.csv"
+                 (change)="onFileSelected($event)" hidden>
+          <button type="button" mat-raised-button color="primary"
+                  (click)="selectorArchivo.click()">
+            <mat-icon>folder_open</mat-icon>
+            Seleccionar archivo
+          </button>
           <p class="drop-hint">Formatos aceptados: .xlsx, .xls, .csv</p>
         } @else {
           <mat-icon class="file-icon">description</mat-icon>

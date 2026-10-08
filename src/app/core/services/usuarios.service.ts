@@ -36,4 +36,7 @@ export class UsuariosService {
   actualizarPermisos(rol_id: number, permisos: Record<string, boolean>): Observable<any> {
     return this.http.put(`${this.base}/api/auth/permisos/`, { rol_id, permisos });
   }
+  enviarCodigoPassword(id: number): Observable<any> {
+    return this.http.post(`${this.base}/api/auth/usuarios/${id}/reset-password/`, {});
+  }
 }

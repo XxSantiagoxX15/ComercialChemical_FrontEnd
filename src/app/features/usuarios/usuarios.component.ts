@@ -91,12 +91,16 @@ export class UsuariosComponent implements OnInit {
       data: usuario ?? null,
     });
     ref.afterClosed().subscribe(result => {
-      if (result) {
+     if (result) {
         this.cargarUsuarios();
-        this.snackBar.open(
-          usuario ? 'Usuario actualizado' : 'Usuario creado',
-          'Cerrar', { duration: 3000 }
-        );
+        let mensaje = 'Usuario actualizado';
+        if (!usuario) {
+          // Al crear, el backend dice si pudo enviar el correo de bienvenida.
+          mensaje = result.correo_enviado === false
+            ? 'Usuario creado, pero no se pudo enviar el correo de bienvenida'
+            : `Usuario creado. Se envió un correo de bienvenida a ${result.email ?? 'su correo'}`;
+        }
+        this.snackBar.open(mensaje, 'Cerrar', { duration: 5000 });
       }
       this.cdr.detectChanges();
     });
@@ -130,15 +134,22 @@ export class UsuariosComponent implements OnInit {
     });
   }
 
-  resetPassword(usuario: any) {
-    const nueva = prompt(`Nueva contraseña para ${usuario.nombre_completo}:`);
-    if (!nueva || nueva.length < 6) {
-      this.snackBar.open('La contraseña debe tener al menos 6 caracteres', 'Cerrar', { duration: 3000 });
-      return;
-    }
-    this.usuariosSvc.resetPassword(usuario.id, nueva).subscribe({
-      next: () => { this.snackBar.open('Contraseña restablecida', 'Cerrar', { duration: 3000 }); this.cdr.detectChanges(); },
-      error: () => { this.snackBar.open('Error al restablecer contraseña', 'Cerrar', { duration: 3000 }); this.cdr.detectChanges(); },
+   resetPassword(usuario: any) {
+    const seguir = confirm(
+      `Se enviará a ${usuario.email} un código para que ${usuario.nombre_completo} ` +
+      'defina una contraseña nueva. ¿Continuar?'
+    );
+    if (!seguir) return;
+
+    this.usuariosSvc.enviarCodigoPassword(usuario.id).subscribe({
+      next: (res) => {
+        this.snackBar.open(res?.message ?? `Se envió un código a ${usuario.email}.`, 'Cerrar', { duration: 5000 });
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.snackBar.open(err.error?.error ?? 'No se pudo enviar el código', 'Cerrar', { duration: 6000 });
+        this.cdr.detectChanges();
+      },
     });
   }
 

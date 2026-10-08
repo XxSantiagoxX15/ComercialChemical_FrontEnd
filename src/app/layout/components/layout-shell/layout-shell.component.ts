@@ -83,7 +83,18 @@ export class LayoutShellComponent {
     const rol = user?.rol ?? user?.rol_nombre ?? user?.role ?? '';
     return rol === 'Administrador';
   }
+  /** true si el rol del usuario tiene el módulo de esa pantalla. */
+  puede(ruta: string): boolean {
+    return this.auth.puedeVerRuta(ruta);
+  }
 
+  /** true si puede ver al menos una de esas pantallas (para los títulos de sección). */
+  puedeAlguna(...rutas: string[]): boolean {
+    return rutas.some(ruta => this.auth.puedeVerRuta(ruta));
+  }
+   cerrarMenuUsuario() {
+    if (this.showUserMenu) this.showUserMenu = false;
+  }
   toggleSidebar()  { this.isSidebarOpen = !this.isSidebarOpen; }
   toggleUserMenu() { this.showUserMenu  = !this.showUserMenu; }
 

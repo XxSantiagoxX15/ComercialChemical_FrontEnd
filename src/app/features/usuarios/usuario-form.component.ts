@@ -131,7 +131,7 @@ export class UsuarioFormComponent implements OnInit {
         });
 
     obs.subscribe({
-      next: () => { this.saving = false; this.dialogRef.close(true); },
+      next: (res) => { this.saving = false; this.dialogRef.close(res ?? true); },
       error: (err) => {
         this.saving = false;
         const msg = err.error?.email?.[0] || err.error?.detail || err.error?.error || 'Error al guardar';
