@@ -234,11 +234,15 @@ export class AuthService {
   }
 
   /** Llama al endpoint de refresh y actualiza el token */
+
   refreshToken(): Observable<any> {
     const refresh = this.getRefreshToken();
     return this.http.post<any>(`${this.apiUrl}/api/auth/refresh/`, { refresh }).pipe(
       tap(res => {
         if (res.access) localStorage.setItem('token', res.access);
+        // El backend entrega un refresh nuevo en cada renovación y anula el
+        // anterior: hay que guardarlo, o la siguiente renovación falla.
+        if (res.refresh) localStorage.setItem('refresh_token', res.refresh);
       })
     );
   }

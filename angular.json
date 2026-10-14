@@ -73,8 +73,25 @@
           },
           "defaultConfiguration": "development"
         },
-        "test": {
-          "builder": "@angular/build:unit-test"
+                "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "exclude": ["**/*.jasmine.spec.ts"]
+          }
+        },
+        "test-karma": {
+          "builder": "@angular/build:karma",
+          "options": {
+            "tsConfig": "tsconfig.karma.json",
+            "karmaConfig": "karma.conf.js",
+            "assets": [
+              "src/favicon.ico",
+              "src/assets"
+            ],
+            "styles": [
+              "src/styles.css"
+            ]
+          }
         }
       }
     }

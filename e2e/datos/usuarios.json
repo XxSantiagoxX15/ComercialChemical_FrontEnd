@@ -1,0 +1,32 @@
+{
+  "administrador": {
+    "nombre": "Ada Administradora",
+    "correo": "admin.e2e@chem.test",
+    "clave": "Prueba#2026",
+    "rol": "Administrador"
+  },
+  "analista": {
+    "nombre": "Andrés Analista",
+    "correo": "analista.e2e@chem.test",
+    "clave": "Prueba#2026",
+    "rol": "Analista_Inventarios"
+  },
+  "compras": {
+    "nombre": "Carla Compras",
+    "correo": "compras.e2e@chem.test",
+    "clave": "Prueba#2026",
+    "rol": "Responsable_Compras"
+  },
+  "olvidadizo": {
+    "nombre": "Olga Olvidadiza",
+    "correo": "olvido.e2e@chem.test",
+    "clave": "Prueba#2026",
+    "rol": "Analista_Inventarios"
+  },
+  "descuidado": {
+    "nombre": "Dario Descuidado",
+    "correo": "bloqueo.e2e@chem.test",
+    "clave": "Prueba#2026",
+    "rol": "Responsable_Compras"
+  }
+}
